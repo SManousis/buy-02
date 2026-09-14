@@ -1,0 +1,94 @@
+spring:
+  application:
+    name: media-service
+
+
+  mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27018/mediaservice}
+
+  data:
+    mongodb:
+      auto-index-creation: true
+
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      # Multipart framing adds bytes around the file itself.
+      max-request-size: 3MB
+
+
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      compression-type: snappy
+      properties:
+        spring.json.add.type.headers: false
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 1
+    consumer:
+      group-id: media-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.value.default.type: com.example.mediaservice.kafka.ProductDeletedEvent
+        spring.json.use.type.headers: "false"
+
+server:
+  port: ${SERVER_PORT:8083}
+  compression:
+    enabled: true
+    mime-types: application/json, image/png, image/jpeg, image/webp
+  error:
+    include-message: never
+    include-stacktrace: never
+
+eureka:
+  client:
+    enabled: ${EUREKA_CLIENT_ENABLED:false}
+    serviceUrl:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8761/eureka/}
+  instance:
+    preferIpAddress: ${EUREKA_PREFER_IP_ADDRESS:true}
+    health-check-url-path: /actuator/health
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+    issuer: ${JWT_ISSUER:user-service}
+    audience: ${JWT_AUDIENCE:buy-01-api}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
+  storage:
+    base-path: ${MEDIA_STORAGE_PATH:./media-storage}
+    public-base-url: ${MEDIA_PUBLIC_BASE_URL:http://localhost:8080/media/images}
+  kafka:
+    topics:
+      image-uploaded: image.uploaded
+      image-deleted: image.deleted
+      product-deleted: product.deleted
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+  info:
+    env:
+      enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.example.mediaservice: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%X{correlationId}] %-5level %logger{36} - %msg%n"

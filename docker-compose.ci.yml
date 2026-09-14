@@ -1,0 +1,18 @@
+services:
+  discovery-service:
+    image: buy01/discovery-service:${IMAGE_TAG:?IMAGE_TAG must be set}
+
+  api-gateway:
+    image: buy01/api-gateway:${IMAGE_TAG:?IMAGE_TAG must be set}
+
+  user-service:
+    image: buy01/user-service:${IMAGE_TAG:?IMAGE_TAG must be set}
+
+  product-service:
+    image: buy01/product-service:${IMAGE_TAG:?IMAGE_TAG must be set}
+
+  media-service:
+    image: buy01/media-service:${IMAGE_TAG:?IMAGE_TAG must be set}
+
+  frontend:
+    image: buy01/frontend:${IMAGE_TAG:?IMAGE_TAG must be set}

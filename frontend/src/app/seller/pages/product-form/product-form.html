@@ -1,0 +1,71 @@
+<div class="container page-wrapper">
+  <div class="form-page">
+    <!-- Sidebar info -->
+    <aside class="form-aside">
+      <h2>{{ editId ? 'Edit Product' : 'New Product' }}</h2>
+      <p>Fill in the product details below.</p>
+      <a *ngIf="editId" [routerLink]="['/seller/products', editId, 'media']" class="btn-outline aside-media-btn">
+        <mat-icon>photo_library</mat-icon> Manage Media
+      </a>
+      <div class="aside-tips">
+        <p><mat-icon>info</mat-icon> Price must be greater than 0</p>
+        <p><mat-icon>info</mat-icon> Stock is optional</p>
+        <p><mat-icon>info</mat-icon> JPG, PNG, or WEBP up to 2 MB</p>
+      </div>
+    </aside>
+
+    <!-- Form -->
+    <div class="form-card">
+      <div *ngIf="loading" class="state-center"><mat-spinner diameter="40"></mat-spinner></div>
+
+      <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <!-- Name -->
+        <mat-form-field appearance="outline">
+          <mat-label>Product Name *</mat-label>
+          <input matInput formControlName="name" placeholder="e.g. Greek Olive Oil 500ml">
+          <mat-error *ngIf="form.get('name')?.hasError('required')">Name is required</mat-error>
+          <mat-error *ngIf="form.get('name')?.hasError('whitespace')">Name cannot be blank</mat-error>
+          <mat-error *ngIf="form.get('name')?.hasError('maxlength')">Max 120 characters</mat-error>
+          <mat-error *ngIf="form.get('name')?.hasError('server')">{{ form.get('name')?.getError('server') }}</mat-error>
+        </mat-form-field>
+
+        <!-- Description -->
+        <mat-form-field appearance="outline">
+          <mat-label>Description *</mat-label>
+          <textarea matInput formControlName="description" rows="4" placeholder="Describe your product..."></textarea>
+          <mat-hint align="end">{{ form.get('description')?.value?.length ?? 0 }}/2000</mat-hint>
+          <mat-error *ngIf="form.get('description')?.hasError('required')">Description is required</mat-error>
+          <mat-error *ngIf="form.get('description')?.hasError('whitespace')">Description cannot be blank</mat-error>
+          <mat-error *ngIf="form.get('description')?.hasError('maxlength')">Max 2000 characters</mat-error>
+          <mat-error *ngIf="form.get('description')?.hasError('server')">{{ form.get('description')?.getError('server') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Price (EUR) *</mat-label>
+          <input matInput formControlName="price" type="number" min="0.01" step="0.01" placeholder="9.99">
+          <span matTextPrefix>&euro;&nbsp;</span>
+          <mat-error *ngIf="form.get('price')?.hasError('required')">Price is required</mat-error>
+          <mat-error *ngIf="form.get('price')?.hasError('min')">Price must be greater than 0</mat-error>
+          <mat-error *ngIf="form.get('price')?.hasError('server')">{{ form.get('price')?.getError('server') }}</mat-error>
+        </mat-form-field>
+
+        <!-- Stock -->
+        <mat-form-field appearance="outline">
+          <mat-label>Stock Quantity</mat-label>
+          <input matInput formControlName="stock" type="number" min="0" placeholder="Leave blank if unlimited">
+          <mat-error *ngIf="form.get('stock')?.hasError('min')">Stock cannot be negative</mat-error>
+          <mat-error *ngIf="form.get('stock')?.hasError('server')">{{ form.get('stock')?.getError('server') }}</mat-error>
+        </mat-form-field>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn-outline" (click)="cancel()">Cancel</button>
+          <button type="submit" class="btn-primary" [disabled]="form.invalid || saving">
+            <span *ngIf="!saving">{{ editId ? 'Update Product' : 'Create Product' }}</span>
+            <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

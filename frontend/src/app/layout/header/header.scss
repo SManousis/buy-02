@@ -1,0 +1,87 @@
+.agora-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #fff;
+  border-bottom: 1px solid var(--color-border);
+  height: var(--header-height);
+  box-shadow: var(--shadow-sm);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  gap: 32px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-decoration: none;
+  letter-spacing: -0.5px;
+
+  .brand-icon { font-size: 18px; color: var(--color-accent); }
+}
+
+.main-nav {
+  display: flex;
+  gap: 28px;
+  flex: 1;
+
+  a {
+    color: var(--color-text);
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    padding-bottom: 3px;
+    border-bottom: 2px solid transparent;
+    transition: border-color .15s, color .15s;
+
+    &:hover, &.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+    }
+  }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.btn-sm {
+  padding: 7px 16px;
+  font-size: 14px;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all .15s;
+}
+
+.seller-btn { gap: 4px; }
+
+.avatar-btn { color: var(--color-primary); }
+.header-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+
+.menu-header {
+  padding: 8px 16px;
+  font-size: 13px;
+  color: var(--color-muted);
+  font-weight: 500;
+}
+
+@media (max-width: 640px) {
+  .main-nav { display: none; }
+  .btn-sm span { display: none; }
+}

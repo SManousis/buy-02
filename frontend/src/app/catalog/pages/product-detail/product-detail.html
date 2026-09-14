@@ -1,0 +1,52 @@
+<main class="container product-detail-page">
+	<div *ngIf="loading" class="state-panel" aria-live="polite">
+		<mat-spinner diameter="40"></mat-spinner>
+		<p>Loading product...</p>
+	</div>
+
+	<div *ngIf="notFound" class="state-panel">
+		<mat-icon>search_off</mat-icon>
+		<h1>Product unavailable</h1>
+		<p>This product may have been removed or is no longer available.</p>
+		<a routerLink="/products" class="btn-primary">Browse products</a>
+	</div>
+
+	<ng-container *ngIf="product">
+		<nav class="breadcrumb" aria-label="Breadcrumb">
+			<a routerLink="/">Home</a>
+			<mat-icon>chevron_right</mat-icon>
+			<a routerLink="/products">Products</a>
+			<mat-icon>chevron_right</mat-icon>
+			<span>{{ product.name }}</span>
+		</nav>
+
+		<article class="product-layout">
+			<section class="product-media" aria-label="Product images">
+				<div class="main-image" [class.no-image]="!selectedImageUrl">
+					<img *ngIf="selectedImageUrl" [src]="selectedImageUrl" [alt]="product.name">
+					<mat-icon *ngIf="!selectedImageUrl">image_not_supported</mat-icon>
+				</div>
+
+				<div *ngIf="product.imageIds.length > 1" class="thumbnails" aria-label="Choose product image">
+					<button type="button" *ngFor="let imageId of product.imageIds; let index = index"
+						[class.selected]="index === selectedImageIndex" (click)="selectImage(index)"
+						[attr.aria-label]="'View image ' + (index + 1)">
+						<img [src]="imageUrl(imageId)" [alt]="product.name + ' image ' + (index + 1)">
+					</button>
+				</div>
+			</section>
+
+			<section class="product-summary">
+				<h1>{{ product.name }}</h1>
+				<p class="price">{{ formattedPrice }}</p>
+				<p class="availability" [class.sold-out]="product.stock === 0">
+					<mat-icon>{{ product.stock === 0 ? 'remove_shopping_cart' : 'inventory_2' }}</mat-icon>
+					{{ availability }}
+				</p>
+				<div class="divider"></div>
+				<h2>About this product</h2>
+				<p class="description">{{ product.description }}</p>
+			</section>
+		</article>
+	</ng-container>
+</main>

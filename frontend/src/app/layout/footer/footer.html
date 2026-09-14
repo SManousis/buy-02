@@ -1,0 +1,16 @@
+<footer class="agora-footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <span class="brand-icon">&#9653;</span>
+      <span>Agora Marketplace</span>
+    </div>
+    <p class="footer-tagline">Quality products from trusted Greek sellers.</p>
+    <div class="footer-links">
+      <a routerLink="/products">Shop</a>
+      <a *ngIf="!auth.isLoggedIn()" routerLink="/auth/register">Become a Seller</a>
+      <a *ngIf="!auth.isLoggedIn()" routerLink="/auth/login">Sign In</a>
+    </div>
+    <p class="footer-copy">&copy; {{ year }} Agora. All rights reserved.</p>
+  </div>
+</footer>
+

@@ -1,0 +1,28 @@
+<section class="product-list-page">
+	<div class="container">
+		<header class="page-header">
+			<p class="eyebrow">Marketplace</p>
+			<h1>Products</h1>
+		</header>
+
+		<div *ngIf="loading" class="state-message">
+			<mat-spinner diameter="40"></mat-spinner>
+			<p>Loading products...</p>
+		</div>
+
+		<div *ngIf="error" class="state-message error-message">
+			<mat-icon>error_outline</mat-icon>
+			<p>Products could not be loaded. Please refresh and try again.</p>
+			<button type="button" class="btn-outline" (click)="loadProducts()">Try again</button>
+		</div>
+
+		<div *ngIf="!loading && !error && products.length > 0" class="product-grid">
+			<app-product-card *ngFor="let product of products" [product]="product"></app-product-card>
+		</div>
+
+		<div *ngIf="!loading && !error && products.length === 0" class="state-message">
+			<mat-icon>storefront</mat-icon>
+			<p>No products are available yet.</p>
+		</div>
+	</div>
+</section>

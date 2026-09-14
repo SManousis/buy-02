@@ -1,0 +1,53 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <!-- Brand -->
+    <div class="auth-brand">
+      <a routerLink="/" class="brand-link">
+        <span class="brand-icon">&#9653;</span>
+        <span>Agora</span>
+      </a>
+    </div>
+
+    <h1 class="auth-title">Welcome back</h1>
+    <p class="auth-sub">Sign in to your account</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <!-- Email -->
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" type="email" autocomplete="email" placeholder="you@example.com">
+        <mat-icon matSuffix>email</mat-icon>
+        <mat-error *ngIf="form.get('email')?.hasError('required')">Email is required</mat-error>
+        <mat-error *ngIf="form.get('email')?.hasError('email')">Enter a valid email address</mat-error>
+      </mat-form-field>
+
+      <!-- Password -->
+      <mat-form-field appearance="outline">
+        <mat-label>Password</mat-label>
+        <input matInput formControlName="password" [type]="hidePassword ? 'password' : 'text'" autocomplete="current-password">
+        <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
+          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error *ngIf="form.get('password')?.hasError('required')">Password is required</mat-error>
+        <mat-error *ngIf="form.get('password')?.hasError('minlength')">At least 6 characters</mat-error>
+      </mat-form-field>
+
+      <button type="submit" class="btn-primary submit-btn" [disabled]="form.invalid || loading">
+        <span *ngIf="!loading">Sign In</span>
+        <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+      </button>
+    </form>
+
+    <p class="auth-switch">Don't have an account? <a routerLink="/auth/register">Register</a></p>
+  </div>
+
+  <!-- Decorative side -->
+  <div class="auth-side">
+    <div class="auth-side-content">
+      <span class="side-icon">&#127981;</span>
+      <h2>Discover the best products from Greek sellers</h2>
+      <p>Join thousands of buyers and sellers on Agora.</p>
+    </div>
+  </div>
+</div>
+

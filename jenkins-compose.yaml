@@ -1,0 +1,47 @@
+name: mr-jenk
+
+services:
+  docker:
+    image: docker:28.4.0-dind
+    container_name: jenkins-docker
+    privileged: true
+    restart: unless-stopped
+    command: --storage-driver=overlay2
+    environment:
+      DOCKER_TLS_CERTDIR: /certs
+    volumes:
+      - jenkins-docker-certs:/certs/client
+      - jenkins-docker-data:/var/lib/docker
+      - jenkins_home:/var/jenkins_home
+    ports:
+      # Ports published by the nested staging application are exposed here.
+      - "8081:8080"
+      - "4200:4200"
+
+  jenkins:
+    build:
+      context: .
+      dockerfile: jenkins/Dockerfile
+    image: mr-jenk/jenkins:2.568.3-docker-cli
+    container_name: jenkins
+    restart: unless-stopped
+    depends_on:
+      - docker
+    environment:
+      DOCKER_HOST: tcp://docker:2376
+      DOCKER_CERT_PATH: /certs/client
+      DOCKER_TLS_VERIFY: "1"
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - jenkins-docker-certs:/certs/client:ro
+
+volumes:
+  jenkins_home:
+    name: mr-jenk_jenkins_home
+  jenkins-docker-certs:
+    name: mr-jenk_jenkins-docker-certs
+  jenkins-docker-data:
+    name: mr-jenk_jenkins-docker-data

@@ -1,0 +1,32 @@
+Media Service — Session Changes
+=================================
+
+1. Docker Compose Readiness
+   Files added:
+     - Dockerfile
+         Two-stage build: Maven compiles in stage 1, JRE-only runtime in stage 2
+         Exposes port 8083 (overridden from default 8082 via SERVER_PORT env var in docker-compose)
+         -Djava.security.egd for faster container startup
+     - .dockerignore
+         Excludes target/, .mvn/, *.md from build context
+
+   Already complete (no changes needed):
+     - application.yml already uses ${MONGODB_URI}, ${KAFKA_BOOTSTRAP_SERVERS},
+       ${JWT_SECRET}, ${MEDIA_STORAGE_PATH}, ${MEDIA_PUBLIC_BASE_URL}
+
+   Suggested commit:
+     chore(media): add Dockerfile and .dockerignore for container builds
+
+----------------------------------------------------------------------
+
+Root workspace
+   Files added:
+     - docker-compose.yml
+         Spins up: MongoDB 7, Kafka 3.7 (KRaft mode, no ZooKeeper), user-service, product-service, media-service
+         Service ports: user-service 8081, product-service 8082, media-service 8083
+         Health checks on mongo and kafka — services wait until infrastructure is ready
+         JWT_SECRET read from host environment variable (shared across all three services)
+         media-storage Docker volume so uploaded files survive container restarts
+
+   Suggested commit:
+     chore: add root docker-compose.yml for full-stack local development

@@ -1,0 +1,97 @@
+<div class="auth-page">
+  <!-- Decorative side -->
+  <div class="auth-side">
+    <div class="auth-side-content">
+      <span class="side-icon">&#128722;</span>
+      <h2>Start selling on Agora today</h2>
+      <p>Join our community of trusted Greek sellers and reach thousands of buyers.</p>
+      <ul class="side-features">
+        <li><mat-icon>check_circle</mat-icon> Free to register</li>
+        <li><mat-icon>check_circle</mat-icon> Upload products instantly</li>
+        <li><mat-icon>check_circle</mat-icon> Secure payments</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="auth-card">
+    <div class="auth-brand">
+      <a routerLink="/" class="brand-link">
+        <span class="brand-icon">&#9653;</span>
+        <span>Agora</span>
+      </a>
+    </div>
+
+    <h1 class="auth-title">Create account</h1>
+    <p class="auth-sub">Join Agora Marketplace</p>
+
+    <!-- Role toggle -->
+    <div class="role-toggle">
+      <button type="button"
+        class="role-btn"
+        [class.active]="form.get('role')?.value === 'CLIENT'"
+        (click)="form.get('role')?.setValue('CLIENT')">
+        <mat-icon>shopping_bag</mat-icon>
+        <span>I'm a Buyer</span>
+      </button>
+      <button type="button"
+        class="role-btn"
+        [class.active]="form.get('role')?.value === 'SELLER'"
+        (click)="form.get('role')?.setValue('SELLER')">
+        <mat-icon>store</mat-icon>
+        <span>I'm a Seller</span>
+      </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <!-- Username -->
+      <mat-form-field appearance="outline">
+        <mat-label>Username</mat-label>
+        <input matInput formControlName="username" autocomplete="username" placeholder="your_username">
+        <mat-icon matSuffix>person</mat-icon>
+        <mat-error *ngIf="form.get('username')?.hasError('required')">Username is required</mat-error>
+        <mat-error *ngIf="form.get('username')?.hasError('minlength')">At least 3 characters</mat-error>
+        <mat-error *ngIf="form.get('username')?.hasError('whitespace')">Username cannot be blank</mat-error>
+        <mat-error *ngIf="form.get('username')?.hasError('maxlength')">Max 50 characters</mat-error>
+      </mat-form-field>
+
+      <!-- Email -->
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" type="email" autocomplete="email" placeholder="you@example.com">
+        <mat-icon matSuffix>email</mat-icon>
+        <mat-error *ngIf="form.get('email')?.hasError('required')">Email is required</mat-error>
+        <mat-error *ngIf="form.get('email')?.hasError('email')">Enter a valid email address</mat-error>
+      </mat-form-field>
+
+      <!-- Password -->
+      <mat-form-field appearance="outline">
+        <mat-label>Password</mat-label>
+        <input matInput formControlName="password" [type]="hidePassword ? 'password' : 'text'" autocomplete="new-password">
+        <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
+          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error *ngIf="form.get('password')?.hasError('required')">Password is required</mat-error>
+        <mat-error *ngIf="form.get('password')?.hasError('minlength')">At least 8 characters</mat-error>
+      </mat-form-field>
+
+      <!-- Confirm password -->
+      <mat-form-field appearance="outline">
+        <mat-label>Confirm Password</mat-label>
+        <input matInput formControlName="confirmPassword" [type]="hideConfirm ? 'password' : 'text'" autocomplete="new-password">
+        <button mat-icon-button matSuffix type="button" (click)="hideConfirm = !hideConfirm">
+          <mat-icon>{{ hideConfirm ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error *ngIf="form.hasError('passwordMismatch') && form.get('confirmPassword')?.touched">
+          Passwords do not match
+        </mat-error>
+      </mat-form-field>
+
+      <button type="submit" class="btn-primary submit-btn" [disabled]="form.invalid || loading">
+        <span *ngIf="!loading">Create Account</span>
+        <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+      </button>
+    </form>
+
+    <p class="auth-switch">Already have an account? <a routerLink="/auth/login">Sign in</a></p>
+  </div>
+</div>

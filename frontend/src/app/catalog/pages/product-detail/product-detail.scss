@@ -1,0 +1,88 @@
+.product-detail-page { padding-bottom: 72px; padding-top: 32px; }
+
+.breadcrumb {
+	align-items: center;
+	color: var(--color-muted);
+	display: flex;
+	font-size: 13px;
+	gap: 4px;
+	margin-bottom: 24px;
+	overflow: hidden;
+	white-space: nowrap;
+
+	a { color: var(--color-muted); text-decoration: none; }
+	a:hover { color: var(--color-primary); }
+	mat-icon { font-size: 17px; height: 17px; width: 17px; }
+	span { overflow: hidden; text-overflow: ellipsis; }
+}
+
+.product-layout {
+	display: grid;
+	gap: 52px;
+	grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+}
+
+.main-image {
+	aspect-ratio: 4 / 3;
+	background: #f0ece3;
+	overflow: hidden;
+
+	img { height: 100%; object-fit: cover; width: 100%; }
+	&.no-image { align-items: center; display: flex; justify-content: center; }
+	&.no-image mat-icon { color: var(--color-muted); font-size: 48px; height: 48px; width: 48px; }
+}
+
+.thumbnails { display: flex; gap: 10px; margin-top: 12px; overflow-x: auto; }
+
+.thumbnails button {
+	background: transparent;
+	border: 2px solid transparent;
+	cursor: pointer;
+	flex: 0 0 72px;
+	height: 56px;
+	padding: 0;
+
+	&.selected { border-color: var(--color-primary); }
+	img { height: 100%; object-fit: cover; width: 100%; }
+}
+
+.product-summary { align-self: center; }
+
+h1 { color: var(--color-text); font-size: 34px; line-height: 1.15; margin: 0 0 18px; }
+.price { color: var(--color-primary); font-size: 30px; font-weight: 800; margin: 0 0 18px; }
+
+.availability {
+	align-items: center;
+	color: #36734d;
+	display: flex;
+	font-size: 14px;
+	font-weight: 600;
+	gap: 7px;
+	margin: 0;
+
+	mat-icon { font-size: 19px; height: 19px; width: 19px; }
+	&.sold-out { color: var(--color-danger); }
+}
+
+.divider { border-top: 1px solid var(--color-border); margin: 28px 0; }
+h2 { color: var(--color-text); font-size: 18px; margin: 0 0 10px; }
+.description { color: var(--color-muted); line-height: 1.7; margin: 0; white-space: pre-line; }
+
+.state-panel {
+	align-items: center;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	min-height: 380px;
+	text-align: center;
+
+	mat-icon { color: var(--color-muted); font-size: 48px; height: 48px; width: 48px; }
+	h1 { font-size: 24px; margin: 16px 0 8px; }
+	p { color: var(--color-muted); margin: 8px 0 20px; }
+}
+
+@media (max-width: 768px) {
+	.product-detail-page { padding-top: 20px; }
+	.product-layout { gap: 28px; grid-template-columns: 1fr; }
+	h1 { font-size: 28px; }
+}

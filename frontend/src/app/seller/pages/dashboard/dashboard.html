@@ -1,0 +1,72 @@
+<div class="container page-wrapper">
+  <!-- Header -->
+  <div class="dash-header">
+    <div>
+      <h1 class="dash-title">Seller Dashboard</h1>
+      <p class="dash-sub">Manage your products and media</p>
+    </div>
+    <div class="dash-actions">
+      <a routerLink="/seller/products/new" class="btn-primary">+ New Product</a>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="state-center">
+    <mat-spinner diameter="48"></mat-spinner>
+  </div>
+
+  <!-- Load error -->
+  <div *ngIf="!loading && loadError" class="empty-dash">
+    <mat-icon>error_outline</mat-icon>
+    <h2>Products could not be loaded</h2>
+    <p>Check your connection and try again.</p>
+    <button type="button" class="btn-primary" (click)="loadProducts()">Try again</button>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && !loadError && products.length === 0" class="empty-dash">
+    <mat-icon>inventory_2</mat-icon>
+    <h2>No products yet</h2>
+    <p>Create your first product listing to start selling.</p>
+    <a routerLink="/seller/products/new" class="btn-primary">Create Product</a>
+  </div>
+
+  <!-- Product table -->
+  <div *ngIf="!loading && !loadError && products.length > 0" class="product-table-wrapper">
+    <div class="stats-strip">
+      <div class="stat">
+        <span class="stat-val">{{ products.length }}</span>
+        <span class="stat-lbl">Products</span>
+      </div>
+      <div class="stat">
+        <span class="stat-val">{{ products | activeCount }}</span>
+        <span class="stat-lbl">In Stock</span>
+      </div>
+    </div>
+
+    <div class="product-rows">
+      <div class="product-row" *ngFor="let p of products">
+        <img class="row-thumb" [src]="imageUrl(p)" [alt]="p.name" loading="lazy">
+        <div class="row-info">
+          <span class="row-name">{{ p.name }}</span>
+        </div>
+        <span class="row-price">{{ formatPrice(p.price) }}</span>
+        <span class="row-stock" [class.out]="p.stock === 0">
+          {{ p.stock != null ? p.stock + ' in stock' : '&mdash;' }}
+        </span>
+        <div class="row-btns">
+          <button mat-icon-button (click)="manageMedia(p.id)" matTooltip="Manage Media">
+            <mat-icon>photo_library</mat-icon>
+          </button>
+          <button mat-icon-button (click)="editProduct(p.id)" matTooltip="Edit">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="deleteProduct(p)" matTooltip="Delete"
+            [disabled]="deletingId === p.id">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

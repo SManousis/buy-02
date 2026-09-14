@@ -1,0 +1,54 @@
+<div class="container page-wrapper">
+  <div class="media-page">
+    <div class="media-header">
+      <button mat-icon-button (click)="back()" matTooltip="Back to dashboard">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div>
+        <h2>Manage Media</h2>
+        <p *ngIf="product">{{ product.name }}</p>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="state-center">
+      <mat-spinner diameter="48"></mat-spinner>
+    </div>
+
+    <div *ngIf="!loading && notFound" class="empty-dash">
+      <mat-icon>error_outline</mat-icon>
+      <h2>Product not found</h2>
+      <button type="button" class="btn-primary" (click)="back()">Back to dashboard</button>
+    </div>
+
+    <section *ngIf="!loading && !notFound" class="image-field" aria-labelledby="images-heading">
+      <div class="image-field-header">
+        <div>
+          <h3 id="images-heading">Product Images</h3>
+          <p>JPG, PNG, or WEBP. Maximum 2 MB per image. Deleting an image is permanent.</p>
+        </div>
+        <label class="btn-outline upload-button" [class.is-disabled]="uploading">
+          <input type="file" accept="image/jpeg,image/png,image/webp" multiple hidden
+            [disabled]="uploading" (change)="onFilesSelected($event)">
+          <mat-icon>upload</mat-icon>
+          {{ uploading ? 'Uploading...' : 'Add images' }}
+        </label>
+      </div>
+
+      <div *ngIf="images.length > 0" class="image-preview-grid">
+        <div *ngFor="let image of images" class="image-preview">
+          <img [src]="image.url" [alt]="image.name">
+          <span>{{ image.name }}</span>
+          <button type="button" mat-icon-button (click)="removeImage(image)"
+            matTooltip="Permanently delete image" aria-label="Permanently delete image">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="images.length === 0" class="empty-dash">
+        <mat-icon>photo_library</mat-icon>
+        <p>No images yet. Add some above.</p>
+      </div>
+    </section>
+  </div>
+</div>

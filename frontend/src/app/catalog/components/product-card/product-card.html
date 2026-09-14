@@ -1,0 +1,14 @@
+<div class="agora-card product-card" [routerLink]="['/products', product.id]">
+  <div class="card-image">
+    <img [src]="imageUrl" [alt]="product.name" loading="lazy">
+    <span *ngIf="product.stock === 0" class="badge-out">Out of stock</span>
+  </div>
+  <div class="card-body">
+    <h3 class="card-title">{{ product.name }}</h3>
+    <p class="card-desc">{{ product.description | slice:0:80 }}{{ product.description.length > 80 ? '...' : '' }}</p>
+    <div class="card-footer">
+      <span class="card-price">{{ formattedPrice }}</span>
+      <button class="btn-primary btn-sm">View</button>
+    </div>
+  </div>
+</div>

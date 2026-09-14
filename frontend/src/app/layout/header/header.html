@@ -1,0 +1,43 @@
+<header class="agora-header">
+  <div class="container header-inner">
+    <!-- Brand -->
+    <a class="brand" routerLink="/">
+      <span class="brand-icon">&#9653;</span>
+      <span class="brand-name">Agora</span>
+    </a>
+
+    <!-- Center nav -->
+    <nav class="main-nav">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Home</a>
+      <a routerLink="/products" routerLinkActive="active">Products</a>
+    </nav>
+
+    <!-- Right side -->
+    <div class="header-actions">
+      <ng-container *ngIf="!isLoggedIn">
+        <a routerLink="/auth/login" class="btn-outline btn-sm">Sign in</a>
+        <a routerLink="/auth/register" class="btn-primary btn-sm">Register</a>
+      </ng-container>
+
+      <ng-container *ngIf="isLoggedIn">
+        <a *ngIf="isSeller" routerLink="/seller" class="btn-outline btn-sm seller-btn">
+          <mat-icon>dashboard</mat-icon> Dashboard
+        </a>
+        <button mat-icon-button [matMenuTriggerFor]="userMenu" class="avatar-btn">
+          <img *ngIf="avatarUrl; else defaultAvatar" class="header-avatar" [src]="avatarUrl" alt="Your avatar">
+          <ng-template #defaultAvatar><mat-icon>account_circle</mat-icon></ng-template>
+        </button>
+        <mat-menu #userMenu="matMenu">
+          <div class="menu-header">{{ username }}</div>
+          <mat-divider></mat-divider>
+          <a mat-menu-item routerLink="/profile">
+            <mat-icon>person</mat-icon> Profile
+          </a>
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon> Sign out
+          </button>
+        </mat-menu>
+      </ng-container>
+    </div>
+  </div>
+</header>

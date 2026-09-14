@@ -1,0 +1,39 @@
+<main class="container page-wrapper">
+  <section class="profile-card" aria-labelledby="profile-heading">
+    <div *ngIf="loading" class="state-center"><mat-spinner diameter="40"></mat-spinner></div>
+
+    <ng-container *ngIf="!loading && profile">
+      <h1 id="profile-heading">Your profile</h1>
+      <p class="profile-email">{{ profile.email }}</p>
+
+      <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+        <mat-form-field appearance="outline">
+          <mat-label>Username</mat-label>
+          <input matInput formControlName="username" autocomplete="username">
+          <mat-error *ngIf="form.get('username')?.hasError('required') || form.get('username')?.hasError('whitespace')">Username is required</mat-error>
+          <mat-error *ngIf="form.get('username')?.hasError('minlength') || form.get('username')?.hasError('maxlength')">Username must be 3–50 characters</mat-error>
+          <mat-error *ngIf="form.get('username')?.hasError('server')">{{ form.get('username')?.getError('server') }}</mat-error>
+        </mat-form-field>
+        <button class="btn-primary" type="submit" [disabled]="form.invalid || saving">
+          <span *ngIf="!saving">Save profile</span><mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
+        </button>
+      </form>
+
+      <section *ngIf="isSeller" class="avatar-section" aria-labelledby="avatar-heading">
+        <h2 id="avatar-heading">Seller avatar</h2>
+        <img *ngIf="avatarUrl; else avatarFallback" class="avatar-image" [src]="avatarUrl" alt="Your avatar">
+        <ng-template #avatarFallback><div class="avatar-fallback" aria-label="No avatar"><mat-icon>account_circle</mat-icon></div></ng-template>
+        <div class="avatar-actions">
+          <label class="btn-outline" [class.is-disabled]="uploading">
+            <input hidden type="file" accept="image/jpeg,image/png,image/webp" [disabled]="uploading" (change)="onAvatarSelected($event)">
+            <mat-icon>upload</mat-icon> {{ uploading ? 'Uploading…' : 'Upload avatar' }}
+          </label>
+          <button *ngIf="avatarUrl" type="button" class="btn-outline" (click)="removeAvatar()" [disabled]="saving || uploading">
+            <mat-icon>delete_outline</mat-icon> Remove avatar
+          </button>
+        </div>
+        <p>JPEG, PNG, or WEBP; up to 2 MB.</p>
+      </section>
+    </ng-container>
+  </section>
+</main>

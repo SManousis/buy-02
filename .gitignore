@@ -1,0 +1,26 @@
+# Maven output
+**/target/
+
+# Frontend output
+**/node_modules/
+**/dist/
+**/.angular/
+**/coverage/
+
+# IDE/editor files
+.idea/
+**/*.iml
+**/.vscode/
+*.LCK*
+*~
+
+# Local environment
+.env
+*.env
+!.env.example
+
+# Jenkins local deployment state
+.jenkins-state/
+
+pass.md
+# Local pass

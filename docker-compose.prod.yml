@@ -1,0 +1,36 @@
+services:
+  mongo:
+    ports: !reset []
+
+  kafka:
+    ports: !reset []
+
+  discovery-service:
+    ports: !reset []
+
+  frontend:
+    ports: !override
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./frontend/nginx.prod.conf:/etc/nginx/templates/default.conf.template:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    environment:
+      - SERVER_NAME=${SERVER_NAME:?SERVER_NAME must be set for HTTPS}
+
+  api-gateway:
+    ports: !reset []
+    environment:
+      - CORS_ALLOWED_ORIGINS=https://${SERVER_NAME:?SERVER_NAME must be set for HTTPS}
+
+  user-service:
+    environment:
+      - CORS_ALLOWED_ORIGINS=https://${SERVER_NAME:?SERVER_NAME must be set for HTTPS}
+
+  product-service:
+    environment:
+      - CORS_ALLOWED_ORIGINS=https://${SERVER_NAME:?SERVER_NAME must be set for HTTPS}
+
+  media-service:
+    environment:
+      - CORS_ALLOWED_ORIGINS=https://${SERVER_NAME:?SERVER_NAME must be set for HTTPS}

@@ -1,0 +1,82 @@
+spring:
+  application:
+    name: product-service
+
+  mongodb:
+    uri: ${MONGODB_URI:mongodb://localhost:27018/productservice}
+
+  data:
+    mongodb:
+      auto-index-creation: true
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      compression-type: snappy
+      properties:
+        spring.json.add.type.headers: false
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 1
+    consumer:
+      group-id: product-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.value.default.type: com.example.productservice.kafka.ImageDeletedEvent
+        spring.json.use.type.headers: "false"
+
+server:
+  port: ${SERVER_PORT:8082}
+  compression:
+    enabled: true
+    mime-types: application/json
+  error:
+    include-message: never
+    include-stacktrace: never
+
+eureka:
+  client:
+    enabled: ${EUREKA_CLIENT_ENABLED:false}
+    serviceUrl:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8761/eureka/}
+  instance:
+    preferIpAddress: ${EUREKA_PREFER_IP_ADDRESS:true}
+    health-check-url-path: /actuator/health
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+    issuer: ${JWT_ISSUER:user-service}
+    audience: ${JWT_AUDIENCE:buy-01-api}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
+  kafka:
+    topics:
+      product-created: product.created
+      product-updated: product.updated
+      product-deleted: product.deleted
+      image-deleted: image.deleted
+  media:
+    base-url: ${MEDIA_SERVICE_BASE_URL:http://localhost:8083}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+  info:
+    env:
+      enabled: true
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%X{correlationId}] %-5level %logger{36} - %msg%n"

@@ -1,0 +1,82 @@
+<!-- ── Hero ──────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container hero-inner">
+    <div class="hero-text">
+      <p class="hero-tag">Greek Marketplace</p>
+      <h1 class="hero-title">Discover unique<br>products from <span>trusted sellers</span></h1>
+      <p class="hero-sub">Browse thousands of items from verified Greek sellers. Authentic quality, delivered to your door.</p>
+      <div class="hero-cta">
+        <a routerLink="/products" class="btn-primary">Shop Now</a>
+        <a *ngIf="!isLoggedIn" routerLink="/auth/register" class="btn-outline">Become a Seller</a>
+      </div>
+    </div>
+    <div class="hero-image">
+      <div class="hero-img-placeholder">
+        <span class="hero-emoji">&#127981;</span>
+        <p>Premium Marketplace</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Trust strip ────────────────────────────────────────────────────── -->
+<section class="trust-strip">
+  <div class="container trust-inner">
+    <div class="trust-item">
+      <mat-icon>local_shipping</mat-icon>
+      <span>Fast Delivery</span>
+    </div>
+    <div class="trust-item">
+      <mat-icon>verified_user</mat-icon>
+      <span>Verified Sellers</span>
+    </div>
+    <div class="trust-item">
+      <mat-icon>lock</mat-icon>
+      <span>Secure Payments</span>
+    </div>
+    <div class="trust-item">
+      <mat-icon>support_agent</mat-icon>
+      <span>24/7 Support</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── Featured products ─────────────────────────────────────────────── -->
+<section class="section-featured">
+  <div class="container">
+    <div class="section-header">
+      <h2>Featured Products</h2>
+      <a routerLink="/products" class="see-all">See all &rarr;</a>
+    </div>
+
+    <div *ngIf="loading" class="loading-state">
+      <mat-icon>hourglass_top</mat-icon>
+      <p>Loading products&hellip;</p>
+    </div>
+
+    <div *ngIf="!loading" class="product-grid">
+      <app-product-card
+        *ngFor="let p of products"
+        [product]="p">
+      </app-product-card>
+    </div>
+
+    <div *ngIf="!loading && products.length === 0" class="empty-state">
+      <mat-icon>storefront</mat-icon>
+      <p>No products yet. Be the first to list one!</p>
+      <a *ngIf="!isLoggedIn" routerLink="/auth/register" class="btn-primary">Start Selling</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Sell CTA banner ───────────────────────────────────────────────── -->
+<section *ngIf="!isLoggedIn" class="sell-banner">
+  <div class="container sell-inner">
+    <div>
+      <h2>Have something to sell?</h2>
+      <p>Join hundreds of Greek sellers and reach thousands of buyers today.</p>
+    </div>
+    <a routerLink="/auth/register" class="btn-accent">Open Your Shop</a>
+  </div>
+</section>
+

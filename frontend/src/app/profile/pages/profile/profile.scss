@@ -1,0 +1,9 @@
+.profile-card { max-width: 600px; margin: 2rem auto; padding: 2rem; background: #fff; border-radius: 12px; box-shadow: 0 4px 18px rgba(0, 0, 0, .08); }
+.profile-card form, .avatar-section { display: grid; gap: 1rem; }
+.profile-email { color: #667085; margin-bottom: 1.5rem; }
+.avatar-section { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #eaecf0; }
+.avatar-image, .avatar-fallback { width: 112px; height: 112px; border-radius: 50%; object-fit: cover; background: #f2f4f7; }
+.avatar-fallback { display: grid; place-items: center; color: #667085; }
+.avatar-fallback mat-icon { width: 72px; height: 72px; font-size: 72px; }
+.avatar-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+.is-disabled { opacity: .55; pointer-events: none; }
