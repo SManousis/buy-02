@@ -1,44 +1,35 @@
-# SonarQube + GitHub + ngrok Setup Instructions
+# SonarQube + GitHub Self-Hosted Runner Setup Instructions
 
-This guide explains how to run the project with SonarQube locally, expose it publicly through ngrok so GitHub-hosted runners can reach it, connect it to GitHub Actions, and enforce the required branch protection checks.
+This guide explains how to run SonarQube locally and analyze pull requests with a GitHub Actions runner hosted in WSL2. The runner can reach SonarQube through the local machine, so SonarQube does not need to be exposed publicly through ngrok or another tunnel.
 
-This setup is intended for a local exercise and lab environment. It is suitable for a school project or a demo, not for a production-grade public deployment.
+This setup is intended for a trusted team working on a private or controlled school-project repository. A self-hosted runner executes workflow code on the host computer, so do not allow untrusted pull requests to use it.
 
 ## 1. Prerequisites
 
 You need:
 
 - Docker Desktop installed and running
+- WSL2 with a Linux distribution such as Ubuntu
 - Git installed
-- A GitHub repository
-- A GitHub account with permission to change repo settings
-- A SonarQube instance
-- An ngrok account with an authtoken
+- A GitHub repository and permission to change its settings
 - The project checked out locally
+- Only trusted collaborators allowed to create or modify workflows
 
-Required software versions:
+The workflow uses Java 21 and Node.js 22. The GitHub setup actions install these versions on the runner.
 
-- Docker Compose v2
-- Java 21 for the backend
-- Node.js 22 for the frontend
+Confirm that the Linux distribution uses WSL2:
 
-## 2. Start SonarQube locally with Docker
-
-From the project root, run:
-
-```bash
-docker compose -f docker-compose.sonar.yml up -d
+```powershell
+wsl --list --verbose
 ```
 
-This starts:
+## 2. Start SonarQube locally
 
-- SonarQube on port 9000
-- PostgreSQL on port 5432
+From the project root in PowerShell, run:
 
-Check that the containers are running:
-
-```bash
-docker ps
+```powershell
+docker compose -f docker-compose.sonar.yml up -d
+docker compose -f docker-compose.sonar.yml ps
 ```
 
 Open:
@@ -47,99 +38,95 @@ Open:
 http://localhost:9000
 ```
 
+Check the server status:
+
+```powershell
+(Invoke-RestMethod http://localhost:9000/api/system/status).status
+```
+
+Continue when it returns `UP` rather than `STARTING`.
+
 ## 3. Configure SonarQube
 
-### 3.1 log in
+### 3.1 Log in
 
-Default login for a fresh SonarQube install:
+The default credentials for a fresh installation are:
 
 ```text
 Username: admin
 Password: admin
 ```
 
-You should immediately change the password.
+Change the default password when prompted.
 
-### 3.2 create a project
+### 3.2 Create the project
 
-In the SonarQube UI:
+In the SonarQube UI, select **Create project**, choose the manual setup method, and assign a clear project name and key.
 
-- Click Create project
-- Or go to Projects → Create project
-- Choose the project setup method
-- Give the project a name and key
-
-### 3.3 create a global token
+### 3.3 Create a token
 
 Go to:
 
 ```text
-My Account -> Security
+My Account -> Security -> Generate Tokens
 ```
 
-Then:
+Create a user token named `github-actions-buy02` and copy it immediately. Never commit this token or place it directly in the workflow file.
 
-- click Generate Token
-- give it a clear name, for example: `github-actions`
-- copy the token immediately and save it in a secure place
+## 4. Install a self-hosted GitHub Actions runner in WSL2
 
-Important:
-
-- Never commit the Sonar token to the repository
-- Store it in GitHub repository secrets or a local `.env` file that is gitignored
-
-## 4. Expose SonarQube using ngrok
-
-GitHub-hosted runners cannot access localhost. To make the Sonar server reachable from GitHub Actions, expose the local port via a public tunnel.
-
-### 4.1 install ngrok
-
-Download the latest stable ngrok binary from the official site:
-
-```text
-https://dashboard.ngrok.com/get-started/setup
-```
-
-If you use the authtoken, install it with:
+Keep the runner outside the project repository. In an Ubuntu/WSL terminal, create its directory:
 
 ```bash
-ngrok config add-authtoken <your-ngrok-authtoken>
+mkdir -p ~/actions-runner
+cd ~/actions-runner
 ```
 
-If the ngrok CLI is too old for your account, you will see an error like:
+In the GitHub repository, go to:
 
 ```text
-Your ngrok-agent version is too old
+Settings -> Actions -> Runners -> New self-hosted runner
 ```
 
-In that case, upgrade to a newer version. Do not use an old 3.3.x binary if your account requires a newer version.
+Select **Linux** and **x64**, then run the download and configuration commands GitHub displays. The registration token in the generated command is temporary; do not publish or reuse it.
 
-### 4.2 start the tunnel
+Recommended answers during configuration:
 
-Run:
+```text
+Runner group: Default
+Runner name: buy02-wsl-runner
+Additional labels: press Enter to skip
+Work folder: press Enter to use _work
+```
+
+Start the runner:
 
 ```bash
-ngrok http 9000
+cd ~/actions-runner
+./run.sh
 ```
 
-This will produce a public URL similar to:
+Keep this terminal open. The runner is ready when it displays `Listening for Jobs`.
 
-```text
-https://buffoon-despite-catalog.ngrok-free.dev
+## 5. Verify that WSL can reach SonarQube
+
+Run this from the WSL terminal, not PowerShell:
+
+```bash
+curl http://localhost:9000/api/system/status
 ```
 
-Use this URL as the Sonar host for GitHub Actions.
+If it returns a JSON response with `"status":"UP"`, use `http://localhost:9000` as the Sonar host. If `localhost` is not reachable from the installed WSL configuration, test:
 
-Important:
+```bash
+curl http://host.docker.internal:9000/api/system/status
+```
 
-- The free ngrok tier can show a browser warning page before the website loads.
-- This is normal for the free plan.
-- GitHub Actions is not a browser, so it can still call the API directly.
-- For a production-like or long-term setup, use a paid ngrok plan, a self-hosted VM, or a publicly reachable server.
+Use the address that returns `UP`.
 
-## 5. Configure GitHub secrets
+## 6. Configure GitHub secrets
 
-In the GitHub repository:
+In the GitHub repository, go to:
 
 ```text
 Settings -> Secrets and variables -> Actions
@@ -148,204 +135,85 @@ Settings -> Secrets and variables -> Actions
 Add these repository secrets:
 
 ```text
-SONAR_HOST_URL = https://<your-ngrok-url>
-SONAR_TOKEN = <your-sonarqube-token>
+SONAR_HOST_URL = http://localhost:9000
+SONAR_TOKEN = <the token generated in SonarQube>
 ```
 
-Example:
+If only `host.docker.internal` worked from WSL, use `http://host.docker.internal:9000` for `SONAR_HOST_URL`. Secrets are configured in GitHub and must not be committed to Git.
 
-```text
-SONAR_HOST_URL = https://buffoon-despite-catalog.ngrok-free.dev
-SONAR_TOKEN = squ_1234567890abcdef
-```
+## 7. Configure the workflow for the self-hosted runner
 
-Do not use localhost in this value.
-
-## 6. Confirm the GitHub Actions workflow
-
-The repository includes a workflow at:
+The workflow is located at:
 
 ```text
 .github/workflows/sonarqube.yml
 ```
 
-This workflow triggers on:
-
-- push to `main`
-- pull requests targeting `main`
-
-It runs:
-
-- backend Sonar analysis
-- frontend build and lint
-- frontend Sonar analysis
-
-Check the workflow file and ensure it references the correct scripts and environment variables.
-
-## 7. Make the Sonar status check required in GitHub
-
-Go to:
-
-```text
-GitHub -> Settings -> Branches
-```
-
-Add a branch protection rule for `main`.
-
-Enable:
-
-- Require a pull request before merging
-- Require approvals: `1`
-- Require status checks to pass before merging
-- Select the required check: `build-and-analyze`
-- Optionally: Require branches to be up to date before merging
-
-This ensures that a PR cannot be merged unless:
-
-- it has at least one approval
-- the GitHub Actions Sonar job succeeds
-
-## 8. Workflow status check name
-
-The status check name is the job name in the workflow file.
-
-In this repo the job is:
+Its job must target the automatically assigned Linux runner labels:
 
 ```yaml
 jobs:
   build-and-analyze:
+    runs-on: [self-hosted, Linux, X64]
 ```
 
-So in GitHub branch protection, you must select:
+The workflow runs on pushes to `main` and pull requests targeting `main`. It performs backend Sonar analysis, the frontend build and lint checks, and frontend Sonar analysis.
+
+## 8. Protect the main branch
+
+Go to:
 
 ```text
-build-and-analyze
+Settings -> Branches
 ```
 
-If the workflow has not run yet, the check will not appear in the list until the first push or PR run completes.
+Create a protection rule for `main` and enable:
 
-## 9. Push a change and verify the pipeline
+- Require a pull request before merging
+- Require one approval
+- Dismiss stale approvals when new reviewable commits are pushed
+- Require status checks to pass before merging
+- Require branches to be up to date before merging
+- Require conversation resolution before merging
 
-Create a small change and push it to a branch.
+Select `build-and-analyze` as a required status check. If it is not listed, save the other protections, open the first pull request, and let the workflow run once. Then return to the rule and select the newly registered `build-and-analyze` check before merging.
 
-Example:
+## 9. Verify the pull-request workflow
+
+Create and push a feature or configuration branch, then open a pull request targeting `main`:
 
 ```bash
-git checkout -b fix/sonar-setup
-git add .
-git commit -m "Add Sonar config validation"
-git push -u origin fix/sonar-setup
+git checkout -b chore/self-hosted-runner
+git add .github/workflows/sonarqube.yml instructions.md SONAR_QUICKSTART.md
+git commit -m "Configure Sonar analysis on self-hosted runner"
+git push -u github chore/self-hosted-runner
 ```
 
-Then open a pull request to `main`.
+Verify that:
 
-Check:
+- SonarQube is `UP`.
+- `./run.sh` displays `Listening for Jobs` in WSL.
+- Opening the PR starts `build-and-analyze`.
+- The WSL runner receives and completes the job.
+- SonarQube receives the backend and frontend analysis.
+- The PR cannot merge until the check passes and a teammate approves it.
 
-- the workflow starts
-- the job `build-and-analyze` runs
-- Sonar receives the scan results
-- the GitHub status check shows success or failure
-- the PR cannot merge until approval and the required status check pass
+## 10. Operating the local runner
 
-## 10. Local validation commands
+SonarQube, Docker Desktop, WSL, and the runner must remain active while a workflow is executing. If the runner is offline, GitHub leaves the job queued until it returns.
 
-Run these on your machine for a quick local validation:
+Start the runner when it is needed:
 
 ```bash
-docker compose -f docker-compose.sonar.yml up -d
-docker ps
+cd ~/actions-runner
+./run.sh
 ```
 
-Then browse:
-
-```text
-http://localhost:9000
-```
-
-For ngrok:
-
-```bash
-ngrok http 9000
-```
-
-For manual backend checks:
+Run the analysis scripts manually from WSL when troubleshooting:
 
 ```bash
 bash scripts/run-sonar-backend.sh
-```
-
-For manual frontend checks:
-
-```bash
 bash scripts/run-sonar-frontend.sh
 ```
 
-## 11. If the push is rejected by GitHub
-
-If `git push` fails, most likely the issue is branch protection or a ruleset on the repository.
-
-Common causes:
-
-- pushing directly to a protected branch
-- required status checks not passing
-- PR approval not granted
-- ruleset disallowing direct pushes
-
-Solution:
-
-- use a feature branch
-- open a pull request
-- wait for required checks to pass
-- get approval and merge
-
-Example:
-
-```bash
-git checkout -b feature/sonar-check
-git push -u origin feature/sonar-check
-```
-
-Then create a PR to `main`.
-
-## 12. Important notes
-
-- Use `localhost` only for local development.
-- Use the ngrok public URL for GitHub-hosted runners.
-- Never store the Sonar token in GitHub code files.
-- Keep the token only in GitHub repository secrets or a local `.env` file that is ignored by Git.
-- The free ngrok plan is okay for a lab exercise, but a paid or self-hosted public host is recommended for production-like setups.
-
-## 13. Summary
-
-To complete the exercise you need all of the following:
-
-1. SonarQube running locally via Docker
-2. A Sonar admin password change
-3. A valid Sonar token generated from My Account → Security
-4. A public hosted URL from ngrok pointing to port 9000
-5. GitHub repository secrets:
-   - `SONAR_HOST_URL`
-   - `SONAR_TOKEN`
-6. A GitHub Actions workflow that triggers on push/PR
-7. A required GitHub status check for `build-and-analyze`
-8. Required PR approval before merging to main
-9. Successful workflow run proving the repo is integrated with SonarQube
-
-Once these are in place, the project is considered properly integrated with SonarQube and GitHub for this exercise.
-
-## 14. Audit note: SonarQube issue resolved
-
-To demonstrate a code-quality improvement required by the audit, a SonarQube issue was resolved in:
-
-```text
-api-gateway/src/main/java/com/example/apigateway/security/SecurityConfig.java
-```
-
-SonarQube reported duplicated string literals for the `SELLER` role and the `/products/{id}` path. These literals were replaced with the following class constants:
-
-```java
-private static final String PRODUCT_BY_ID_PATH = "/products/{id}";
-private static final String SELLER_ROLE = "SELLER";
-```
-
-This change removes the duplication, improves maintainability, and provides evidence that an issue identified by SonarQube was reviewed and fixed. After pushing the change, run the GitHub Actions workflow again and confirm in SonarQube that the issues are marked as resolved.
+The self-hosted runner initiates an outbound connection to GitHub and accesses SonarQube locally. No public tunnel, inbound router port, or ngrok account is required.

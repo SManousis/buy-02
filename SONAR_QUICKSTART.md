@@ -1,63 +1,62 @@
 # SonarQube Quick Start
 
-This is the short version for running the project with SonarQube, ngrok, GitHub, and branch protection.
+This is the short setup for local SonarQube, a GitHub Actions runner hosted in WSL2, pull-request analysis, and branch protection. It does not require ngrok or another public tunnel.
 
-## 1) Start SonarQube locally
+## 1. Start SonarQube
 
-```bash
+From PowerShell in the project root:
+
+```powershell
 docker compose -f docker-compose.sonar.yml up -d
-docker ps
+(Invoke-RestMethod http://localhost:9000/api/system/status).status
 ```
 
-Open:
+Continue when the status is `UP`, then open `http://localhost:9000`. For a fresh installation, sign in with `admin / admin` and change the password.
 
-```text
-http://localhost:9000
-```
-
-Login:
-
-```text
-admin / admin
-```
-
-Change the password and then create a project.
-
-## 2) Create a Sonar token
+## 2. Create the SonarQube token
 
 Go to:
 
 ```text
-My Account -> Security
+My Account -> Security -> Generate Tokens
 ```
 
-Then:
+Create a user token named `github-actions-buy02` and copy it immediately. Never commit it.
 
-- Generate Token
-- Name it: `github-actions`
-- Copy the token and save it safely
+## 3. Install the GitHub runner in WSL2
 
-Important: do not commit it.
-
-## 3) Expose Sonar with ngrok
-
-Install ngrok and start a tunnel:
-
-```bash
-ngrok http 9000
-```
-
-This gives you a public URL like:
+In the GitHub repository, open:
 
 ```text
-https://xxxx.ngrok-free.app
+Settings -> Actions -> Runners -> New self-hosted runner
 ```
 
-Use that URL in GitHub Actions, not localhost.
+Choose **Linux/x64**. In WSL, install the runner outside the project:
 
-## 4) Add GitHub secrets
+```bash
+mkdir -p ~/actions-runner
+cd ~/actions-runner
+```
 
-In GitHub:
+Run the commands displayed by GitHub. Use `buy02-wsl-runner` as the runner name and accept the default group, labels, and `_work` folder. Then start it:
+
+```bash
+./run.sh
+```
+
+Wait for `Listening for Jobs`.
+
+## 4. Verify local connectivity from WSL
+
+```bash
+curl http://localhost:9000/api/system/status
+```
+
+If that fails, try `http://host.docker.internal:9000`. Use the address that returns `"status":"UP"`.
+
+## 5. Add GitHub secrets
+
+Go to:
 
 ```text
 Settings -> Secrets and variables -> Actions
@@ -66,76 +65,42 @@ Settings -> Secrets and variables -> Actions
 Add:
 
 ```text
-SONAR_HOST_URL = https://<your-ngrok-url>
-SONAR_TOKEN = <your-sonarqube-token>
+SONAR_HOST_URL = http://localhost:9000
+SONAR_TOKEN = <your SonarQube token>
 ```
 
-## 5) Push / PR to trigger the workflow
+Use `http://host.docker.internal:9000` instead if that was the address reachable from WSL.
 
-The workflow runs on:
+## 6. Target the self-hosted runner
 
-- push to `main`
-- pull request to `main`
+In `.github/workflows/sonarqube.yml`, configure:
 
-File:
-
-```text
-.github/workflows/sonarqube.yml
+```yaml
+jobs:
+  build-and-analyze:
+    runs-on: [self-hosted, Linux, X64]
 ```
 
-The job name is:
+The workflow runs for pull requests targeting `main` and pushes to `main`.
 
-```text
-build-and-analyze
-```
+## 7. Protect `main`
 
-## 6) Protect the main branch
+Under `Settings -> Branches`, create a protection rule for `main` and require:
 
-In GitHub:
+- Pull requests before merging
+- One teammate approval
+- Passing status checks
+- The `build-and-analyze` check
+- Up-to-date branches before merging
 
-```text
-Settings -> Branches
-```
+If the check is not initially listed, run the workflow through the first PR and then add the check to the rule before merging.
 
-Create branch protection for `main` and enable:
+## 8. Verify the setup
 
-- Require a pull request before merging
-- Require approvals: 1
-- Require status checks to pass before merging
-- Select: `build-and-analyze`
+- Keep Docker Desktop, SonarQube, WSL, and `./run.sh` running.
+- Push a non-protected branch and open a PR to `main`.
+- Confirm the runner receives `build-and-analyze`.
+- Confirm SonarQube receives the analysis.
+- Confirm approval and the successful check are required before merge.
 
-## 7) Final verification
-
-- Push a change to a branch
-- Open a PR
-- Wait for the GitHub Action to run
-- Confirm Sonar receives the analysis
-- Confirm merge is blocked until approval and the Sonar check passes
-
-## 8) If push is rejected
-
-This usually means the repository has branch rules or a ruleset. Use:
-
-```bash
-git checkout -b feature/sonar-check
-git push -u origin feature/sonar-check
-```
-
-Then open a PR to `main`.
-
-## 9) Quick commands
-
-```bash
-docker compose -f docker-compose.sonar.yml up -d
-git checkout -b feature/sonar-check
-git add .
-git commit -m "Add Sonar integration"
-git push -u origin feature/sonar-check
-```
-
-## Important
-
-- Localhost is only for local testing
-- GitHub runners need a public URL
-- Use ngrok for the exercise
-- Never commit the Sonar token
+The runner connects outward to GitHub and reaches SonarQube locally, so no public tunnel is needed.
