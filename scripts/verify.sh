@@ -33,6 +33,7 @@ run_maven_tests discovery-service
 run_maven_tests user-service
 run_maven_tests product-service
 run_maven_tests media-service
+run_maven_tests order-service
 
 (
   cd frontend

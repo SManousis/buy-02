@@ -14,5 +14,8 @@ services:
   media-service:
     image: buy01/media-service:${IMAGE_TAG:?IMAGE_TAG must be set}
 
+  order-service:
+    image: buy01/order-service:${IMAGE_TAG:?IMAGE_TAG must be set}
+
   frontend:
     image: buy01/frontend:${IMAGE_TAG:?IMAGE_TAG must be set}

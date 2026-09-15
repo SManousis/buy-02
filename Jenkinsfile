@@ -69,7 +69,8 @@ pipeline {
                                 discovery-service \
                                 user-service \
                                 product-service \
-                                media-service
+                                media-service \
+                                order-service
                             do
                                 echo "Building and testing ${service}"
                                 (

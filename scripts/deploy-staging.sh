@@ -6,7 +6,7 @@ project_name="buy01-staging"
 state_dir=".jenkins-state"
 state_file="${state_dir}/staging-last-successful-tag"
 compose_files="-f docker-compose.yml -f docker-compose.ci.yml"
-services="mongo kafka discovery-service user-service product-service media-service api-gateway frontend"
+services="mongo kafka discovery-service user-service product-service media-service order-service api-gateway frontend"
 
 : "${JWT_SECRET:?JWT_SECRET must be supplied by Jenkins Credentials}"
 

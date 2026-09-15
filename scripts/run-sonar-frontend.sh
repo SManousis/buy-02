@@ -6,11 +6,6 @@ if [[ -z "${SONAR_HOST_URL:-}" || -z "${SONAR_TOKEN:-}" ]]; then
   exit 0
 fi
 
-if [[ "${SONAR_HOST_URL}" == *localhost* ]]; then
-  echo "Skipping frontend Sonar upload because localhost is not reachable from GitHub-hosted runners. Use a real Sonar host URL for CI."
-  exit 0
-fi
-
 cd "$(dirname "$0")/../frontend"
 
 npm ci

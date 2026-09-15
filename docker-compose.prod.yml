@@ -34,3 +34,7 @@ services:
   media-service:
     environment:
       - CORS_ALLOWED_ORIGINS=https://${SERVER_NAME:?SERVER_NAME must be set for HTTPS}
+
+  order-service:
+    environment:
+      - CORS_ALLOWED_ORIGINS=https://${SERVER_NAME:?SERVER_NAME must be set for HTTPS}
