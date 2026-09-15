@@ -16,7 +16,7 @@ services:
     ports:
       # Ports published by the nested staging application are exposed here.
       - "8081:8080"
-      - "4200:4200"
+      - "4300:4200"
 
   jenkins:
     build:

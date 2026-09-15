@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '../../shared/services/auth';
@@ -20,7 +20,13 @@ export class Header implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private auth: AuthService, private media: MediaService, private router: Router, private carts: CartService) {}
+  constructor(
+    private auth: AuthService,
+    private media: MediaService,
+    private router: Router,
+    private carts: CartService,
+    private changeDetector: ChangeDetectorRef,
+  ) {}
 
   ngOnInit(): void {
     this.auth.currentUser$
@@ -32,7 +38,10 @@ export class Header implements OnInit, OnDestroy {
         if (user) this.carts.get().subscribe({ error: () => this.carts.resetCount() });
         else this.carts.resetCount();
       });
-    this.carts.itemCount$.pipe(takeUntil(this.destroy$)).subscribe(count => this.cartCount = count);
+    this.carts.itemCount$.pipe(takeUntil(this.destroy$)).subscribe(count => {
+      this.cartCount = count;
+      this.changeDetector.detectChanges();
+    });
     this.auth.currentProfile$
       .pipe(takeUntil(this.destroy$))
       .subscribe(profile => {

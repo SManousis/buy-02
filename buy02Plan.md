@@ -27,13 +27,15 @@ This is the shared source of truth for current progress. Update the relevant che
 
 ### Phase 2 - Persistent cart
 
+**Status:** Implementation and manual acceptance complete; awaiting the Angular cart PR checks, approval, and merge.
+
 - [x] Implement the persistent cart model, unique user index, product/stock validation, snapshots, endpoints, error handling, and tests on `feature-cart-api`.
 - [x] Verify the order-service suite: 7 tests passing.
 - [x] Commit and push `feature-cart-api` to GitHub and Gitea.
 - [x] Open the cart PR, pass Jenkins and SonarQube, obtain approval, and merge.
 - [x] Implement the Angular cart page, cart service, controls, subtotal, and header badge on `feature-angular-cart`; production build passes.
 - [ ] Push `feature-angular-cart`, pass Jenkins and SonarQube, obtain approval, and merge.
-- [ ] Verify manually that cart contents and quantities survive browser refresh.
+- [x] Verify manually that cart contents and quantities survive browser refresh; badge and quantity changes render immediately.
 
 ### Phase 3 - Checkout and orders
 
