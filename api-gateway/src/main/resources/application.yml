@@ -30,6 +30,10 @@ spring:
                 - name: RequestSize
                   args:
                     maxSize: ${GATEWAY_MEDIA_MAX_REQUEST_SIZE:3MB}
+            - id: order-service-route
+              uri: lb://order-service
+              predicates:
+                - Path=/cart,/cart/**,/orders,/orders/**,/wishlist,/wishlist/**
 
 eureka:
   client:
