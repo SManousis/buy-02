@@ -331,3 +331,62 @@ Phase 3 is complete only when:
 - The acceptance scenario passes end to end.
 - CI/SonarQube passes on the feature PR.
 - The Phase 3 status in `buy02Plan.md` is updated accurately.
+
+## 6. Step 11 verification record and design notes
+
+Recorded when Step 11 was executed on `feature-phase3-orders-checkout`.
+
+### What was verified
+
+- Gateway routing: `api-gateway`'s `order-service-route` already matched
+  `/cart,/cart/**,/orders,/orders/**,/wishlist,/wishlist/**`. No change needed.
+- Kafka topic names in `order-service`'s `application.yml`
+  (`order.created`, `order.status.changed`, `order.cancelled`) match the
+  event types actually published by `OrderEventProducer`. No change needed.
+- Backend tests: `order-service` 37/37 passing, `product-service` 48/48
+  passing (run via `.\mvnw.cmd test` on Windows — WSL/`bash ./mvnw` is not
+  available in this environment).
+- Frontend tests: 112/112 Angular specs passing across 27 files
+  (`npm test -- --watch=false`), covering cart, checkout, buyer orders, and
+  seller orders added in Steps 8-10.
+- Production frontend build (`npm run build`) succeeds, including the new
+  `cart-module`, `orders-module`, and updated `seller-module` lazy chunks.
+- `docker compose config --quiet` succeeds (requires `JWT_SECRET` to be set),
+  confirming Compose wiring stays valid.
+
+### Fixed during this step
+
+- `frontend/package.json`'s `"test"` script was a no-op stub
+  (`echo 'No automated frontend test suite is configured...'`) even though
+  both `Jenkinsfile` and `scripts/verify.sh` invoke
+  `npm test -- --watch=false` expecting it to run the suite. This meant CI
+  would report green without ever executing any Angular test, including all
+  112 tests added across Steps 8-10. Fixed by changing the script to
+  `"ng test"` (the `angular.json` architect target was already correct).
+
+### Known limitations / deviations
+
+- **No live end-to-end run of the acceptance scenario in §4.** The local
+  Docker engine is not functional in this environment (`docker ps` fails
+  even though the `docker` CLI and `docker compose config` work), so the
+  full two-seller/one-buyer flow through the Gateway and a running Kafka
+  broker could not be exercised here. Everything was verified at the
+  unit/component level plus static config checks instead. Whoever opens the
+  PR should run the acceptance scenario locally (or in CI with Docker
+  available) before merging.
+- **Kafka events carry `orderId`/`checkoutGroupId` but no explicit
+  `correlationId` field.** `OrderEvent` (eventType, orderId,
+  checkoutGroupId, buyerId, sellerId, subtotal, status, occurredAt) does not
+  propagate the HTTP `X-Correlation-ID`/MDC value into the Kafka payload or
+  headers. This satisfies acceptance item #15 in spirit (events do carry
+  order/checkout identifiers), but is worth revisiting if end-to-end request
+  tracing across HTTP and Kafka becomes a requirement.
+- **The Angular cart page (Step 8) was built on this branch, not on
+  `feature-cart-api`** referenced in `buy02Plan.md` Phase 2. Phase 2's
+  backend cart API was already implemented separately; this branch adds the
+  UI that consumes it. `buy02Plan.md` has been updated to note this.
+- **`ProductDetail.canAddToCart` infers that sellers cannot add products to
+  a cart** (add-to-cart is hidden/disabled for the `SELLER` role). This was
+  an implementation choice made while wiring the cart UI in Step 8 and has
+  not been explicitly confirmed against a written product rule — flag for
+  review if a seller should be allowed to buy as a customer.

@@ -31,15 +31,15 @@ This is the shared source of truth for current progress. Update the relevant che
 - [x] Verify the order-service suite: 7 tests passing.
 - [ ] Commit and push `feature-cart-api` to GitHub and Gitea.
 - [ ] Open the cart PR, pass Jenkins and SonarQube, obtain approval, and merge.
-- [ ] Implement the Angular cart page, cart service, controls, subtotal, and header badge in a separate PR.
+- [x] Implement the Angular cart page, cart service, controls, subtotal, and header badge — prepared on the open `feature-phase3-orders-checkout` branch (built alongside Phase 3 checkout, not on `feature-cart-api`); not yet merged.
 - [ ] Verify manually that cart contents and quantities survive browser refresh.
 
 ### Phase 3 - Checkout and orders
 
-- [ ] Add the order schema, status history, per-seller checkout, and cash on delivery.
-- [ ] Add atomic stock decrement and restore integration.
-- [ ] Add buyer/seller listing, search, status transitions, cancellation, and reorder.
-- [ ] Add backend tests and buyer/seller Angular pages.
+- [x] Add the order schema, status history, per-seller checkout, and cash on delivery — prepared on the open `feature-phase3-orders-checkout` branch; not yet merged.
+- [x] Add atomic stock decrement and restore integration — prepared on the open `feature-phase3-orders-checkout` branch; not yet merged.
+- [x] Add buyer/seller listing, search, status transitions, cancellation, and reorder — prepared on the open `feature-phase3-orders-checkout` branch; not yet merged.
+- [x] Add backend tests and buyer/seller Angular pages — prepared on the open `feature-phase3-orders-checkout` branch (order-service 37/37, product-service 48/48, Angular 112/112 passing); not yet merged. See `PHASE3_WORKFLOW.md` for the step-by-step record and design notes.
 
 ### Phase 4 - Search and filtering
 
