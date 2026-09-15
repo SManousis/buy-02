@@ -3,6 +3,7 @@ package com.example.productservice.controller;
 import com.example.productservice.dto.CreateProductRequest;
 import com.example.productservice.dto.ProductResponse;
 import com.example.productservice.dto.UpdateProductRequest;
+import com.example.productservice.dto.StockAdjustmentRequest;
 import com.example.productservice.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,14 @@ public class ProductController {
     @GetMapping("/{id}")
     public ProductResponse getProduct(@PathVariable String id) {
         return productService.getProductById(id);
+    }
+
+    @PatchMapping("/{id}/stock")
+    public ProductResponse adjustStock(
+            @PathVariable String id,
+            @Valid @RequestBody StockAdjustmentRequest request
+    ) {
+        return productService.adjustStock(id, request.delta());
     }
 
     @PostMapping
