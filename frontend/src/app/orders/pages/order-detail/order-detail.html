@@ -1,0 +1,92 @@
+<div class="container page-wrapper order-detail-page">
+  <a routerLink="/orders" class="back-link">
+    <mat-icon>arrow_back</mat-icon> Back to orders
+  </a>
+
+  <div *ngIf="loading" class="state-center" aria-live="polite">
+    <mat-spinner diameter="48"></mat-spinner>
+  </div>
+
+  <div *ngIf="!loading && notFound" class="empty-dash">
+    <mat-icon>search_off</mat-icon>
+    <h2>Order not found</h2>
+    <p>This order does not exist or you don't have access to it.</p>
+    <a routerLink="/orders" class="btn-primary">Back to orders</a>
+  </div>
+
+  <ng-container *ngIf="!loading && !notFound && order as o">
+    <div class="detail-header">
+      <div>
+        <h1 class="dash-title">Order #{{ o.id.slice(-8) }}</h1>
+        <p class="dash-sub">Placed {{ o.createdAt | date:'medium' }}</p>
+      </div>
+      <span class="status-badge" [ngClass]="statusClass(o.status)">{{ o.status }}</span>
+    </div>
+
+    <!-- Status timeline -->
+    <div class="timeline" *ngIf="o.status !== 'CANCELLED'">
+      <div class="timeline-step" [class.reached]="isStatusReached('PENDING')">
+        <span class="dot"></span><span class="label">Pending</span>
+      </div>
+      <div class="timeline-step" [class.reached]="isStatusReached('CONFIRMED')">
+        <span class="dot"></span><span class="label">Confirmed</span>
+      </div>
+      <div class="timeline-step" [class.reached]="isStatusReached('SHIPPED')">
+        <span class="dot"></span><span class="label">Shipped</span>
+      </div>
+      <div class="timeline-step" [class.reached]="isStatusReached('DELIVERED')">
+        <span class="dot"></span><span class="label">Delivered</span>
+      </div>
+    </div>
+
+    <div class="detail-layout">
+      <div class="detail-main">
+        <section class="agora-card detail-section">
+          <h2>Items</h2>
+          <div class="item-row" *ngFor="let item of o.items">
+            <span class="item-name">{{ item.name }}</span>
+            <span class="item-qty">x{{ item.quantity }}</span>
+            <span class="item-price">{{ item.unitPrice * item.quantity | currency:'EUR' }}</span>
+          </div>
+          <div class="item-row total-row">
+            <span class="item-name">Subtotal</span>
+            <span></span>
+            <span class="item-price">{{ o.subtotal | currency:'EUR' }}</span>
+          </div>
+        </section>
+
+        <section class="agora-card detail-section" *ngIf="o.statusHistory.length > 0">
+          <h2>History</h2>
+          <div class="history-row" *ngFor="let entry of o.statusHistory">
+            <span class="status-badge" [ngClass]="statusClass(entry.status)">{{ entry.status }}</span>
+            <span class="history-date">{{ entry.changedAt | date:'medium' }}</span>
+          </div>
+        </section>
+      </div>
+
+      <aside class="detail-side">
+        <section class="agora-card detail-section">
+          <h2>Shipping Address</h2>
+          <p class="address-line">{{ o.shippingAddress.line1 }}</p>
+          <p class="address-line">{{ o.shippingAddress.city }}, {{ o.shippingAddress.postalCode }}</p>
+          <p class="address-line">{{ o.shippingAddress.country }}</p>
+        </section>
+
+        <section class="agora-card detail-section">
+          <h2>Payment</h2>
+          <p class="address-line">Cash on delivery</p>
+          <p class="address-line">{{ o.paymentStatus }}</p>
+        </section>
+
+        <div class="detail-actions">
+          <button type="button" class="btn-primary" [disabled]="reordering" (click)="reorder()">
+            {{ reordering ? 'Reordering…' : 'Reorder' }}
+          </button>
+          <button type="button" class="btn-outline cancel-btn" *ngIf="canCancel" [disabled]="cancelling" (click)="cancel()">
+            {{ cancelling ? 'Cancelling…' : 'Cancel order' }}
+          </button>
+        </div>
+      </aside>
+    </div>
+  </ng-container>
+</div>
