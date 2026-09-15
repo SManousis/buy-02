@@ -20,6 +20,10 @@
       </ng-container>
 
       <ng-container *ngIf="isLoggedIn">
+        <a routerLink="/cart" mat-icon-button class="cart-link" aria-label="Open shopping cart"
+          [matBadge]="cartCount" [matBadgeHidden]="cartCount === 0" matBadgeColor="accent">
+          <mat-icon>shopping_cart</mat-icon>
+        </a>
         <a *ngIf="isSeller" routerLink="/seller" class="btn-outline btn-sm seller-btn">
           <mat-icon>dashboard</mat-icon> Dashboard
         </a>

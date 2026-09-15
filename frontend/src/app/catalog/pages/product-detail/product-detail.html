@@ -43,6 +43,9 @@
 					<mat-icon>{{ product.stock === 0 ? 'remove_shopping_cart' : 'inventory_2' }}</mat-icon>
 					{{ availability }}
 				</p>
+				<button class="btn-primary add-cart" type="button" (click)="addToCart()" [disabled]="product.stock === 0 || adding">
+					<mat-icon>add_shopping_cart</mat-icon>{{ adding ? 'Adding…' : 'Add to cart' }}
+				</button>
 				<div class="divider"></div>
 				<h2>About this product</h2>
 				<p class="description">{{ product.description }}</p>

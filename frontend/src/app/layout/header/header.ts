@@ -1,8 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '../../shared/services/auth';
 import { MediaService } from '../../shared/services/media';
+import { CartService } from '../../shared/services/cart';
 
 @Component({
   selector: 'app-header',
@@ -15,10 +16,17 @@ export class Header implements OnInit, OnDestroy {
   isSeller = false;
   username = '';
   avatarUrl: string | null = null;
+  cartCount = 0;
 
   private destroy$ = new Subject<void>();
 
-  constructor(private auth: AuthService, private media: MediaService, private router: Router) {}
+  constructor(
+    private auth: AuthService,
+    private media: MediaService,
+    private router: Router,
+    private carts: CartService,
+    private changeDetector: ChangeDetectorRef,
+  ) {}
 
   ngOnInit(): void {
     this.auth.currentUser$
@@ -27,7 +35,13 @@ export class Header implements OnInit, OnDestroy {
         this.isLoggedIn = !!user;
         this.isSeller = user?.role === 'SELLER';
         this.username = user?.username ?? '';
+        if (user) this.carts.get().subscribe({ error: () => this.carts.resetCount() });
+        else this.carts.resetCount();
       });
+    this.carts.itemCount$.pipe(takeUntil(this.destroy$)).subscribe(count => {
+      this.cartCount = count;
+      this.changeDetector.detectChanges();
+    });
     this.auth.currentProfile$
       .pipe(takeUntil(this.destroy$))
       .subscribe(profile => {
@@ -42,6 +56,7 @@ export class Header implements OnInit, OnDestroy {
 
   logout(): void {
     this.auth.logout();
+    this.carts.resetCount();
     this.router.navigate(['/']);
   }
 }

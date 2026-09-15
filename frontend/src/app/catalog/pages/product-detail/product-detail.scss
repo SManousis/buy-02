@@ -65,6 +65,7 @@ h1 { color: var(--color-text); font-size: 34px; line-height: 1.15; margin: 0 0 1
 }
 
 .divider { border-top: 1px solid var(--color-border); margin: 28px 0; }
+.add-cart { align-items: center; display: inline-flex; gap: 8px; margin-top: 22px; }
 h2 { color: var(--color-text); font-size: 18px; margin: 0 0 10px; }
 .description { color: var(--color-muted); line-height: 1.7; margin: 0; white-space: pre-line; }
 

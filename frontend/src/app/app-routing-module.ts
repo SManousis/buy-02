@@ -23,6 +23,11 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     loadChildren: () => import('./profile/profile-module').then(m => m.ProfileModule)
   },
+  {
+    path: 'cart',
+    canActivate: [AuthGuard],
+    loadChildren: () => import('./cart/cart-module').then(m => m.CartModule)
+  },
   { path: '**', redirectTo: '' }
 ];
 
