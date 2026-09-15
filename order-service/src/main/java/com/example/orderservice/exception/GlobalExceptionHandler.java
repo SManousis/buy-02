@@ -26,6 +26,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ProductServiceUnavailableException.class) ResponseEntity<Map<String,Object>> unavailable(ProductServiceUnavailableException ex) { return build(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage(), null); }
     @ExceptionHandler(EmptyCartException.class) ResponseEntity<Map<String,Object>> emptyCart(EmptyCartException ex) { return build(HttpStatus.BAD_REQUEST, ex.getMessage(), null); }
     @ExceptionHandler(OrderConflictException.class) ResponseEntity<Map<String,Object>> orderConflict(OrderConflictException ex) { return build(HttpStatus.CONFLICT, ex.getMessage(), null); }
+    @ExceptionHandler(InvalidTransitionException.class) ResponseEntity<Map<String,Object>> invalidTransition(InvalidTransitionException ex) { return build(HttpStatus.BAD_REQUEST, ex.getMessage(), null); }
     private ResponseEntity<Map<String,Object>> build(HttpStatus status, String message, Object details) {
         Map<String,Object> body = new LinkedHashMap<>(); body.put("timestamp", Instant.now().toString()); body.put("status", status.value()); body.put("error", status.getReasonPhrase()); body.put("message", message); body.put("correlationId", MDC.get(CorrelationIdFilter.MDC_KEY)); if(details != null) body.put("details", details); return ResponseEntity.status(status).body(body);
     }
