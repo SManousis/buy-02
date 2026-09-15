@@ -3,12 +3,14 @@ package com.example.orderservice.controller;
 import com.example.orderservice.dto.CheckoutRequest;
 import com.example.orderservice.dto.CheckoutResponse;
 import com.example.orderservice.dto.OrderResponse;
+import com.example.orderservice.dto.ReorderResponse;
 import com.example.orderservice.dto.StatusUpdateRequest;
 import com.example.orderservice.model.OrderStatus;
 import com.example.orderservice.service.CheckoutService;
 import com.example.orderservice.service.OrderCancellationService;
 import com.example.orderservice.service.OrderQueryService;
 import com.example.orderservice.service.OrderStatusService;
+import com.example.orderservice.service.ReorderService;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpHeaders;
@@ -24,13 +26,16 @@ public class OrderController {
     private final OrderQueryService queryService;
     private final OrderStatusService statusService;
     private final OrderCancellationService cancellationService;
+    private final ReorderService reorderService;
 
     public OrderController(CheckoutService checkoutService, OrderQueryService queryService,
-                            OrderStatusService statusService, OrderCancellationService cancellationService) {
+                            OrderStatusService statusService, OrderCancellationService cancellationService,
+                            ReorderService reorderService) {
         this.checkoutService = checkoutService;
         this.queryService = queryService;
         this.statusService = statusService;
         this.cancellationService = cancellationService;
+        this.reorderService = reorderService;
     }
 
     @PostMapping("/checkout")
@@ -71,6 +76,11 @@ public class OrderController {
                                  @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken,
                                  @PathVariable String id) {
         return OrderResponse.from(cancellationService.cancel(id, jwt.getSubject(), bearerToken));
+    }
+
+    @PostMapping("/{id}/reorder")
+    public ReorderResponse reorder(@AuthenticationPrincipal Jwt jwt, @PathVariable String id) {
+        return reorderService.reorder(id, jwt.getSubject());
     }
 
     private void ensureSeller(Jwt jwt) {
