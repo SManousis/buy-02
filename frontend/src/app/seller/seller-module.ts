@@ -16,6 +16,8 @@ import { SellerRoutingModule } from './seller-routing-module';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { ProductForm } from './pages/product-form/product-form';
 import { ProductMedia } from './pages/product-media/product-media';
+import { SellerOrders } from './pages/orders/orders';
+import { SellerOrderDetail } from './pages/order-detail/order-detail';
 import { ConfirmDialogComponent } from '../shared/components/confirm-dialog/confirm-dialog';
 import { Product } from '../shared/services/product';
 
@@ -27,7 +29,7 @@ export class ActiveCountPipe implements PipeTransform {
 }
 
 @NgModule({
-  declarations: [Dashboard, ProductForm, ProductMedia, ActiveCountPipe, ConfirmDialogComponent],
+  declarations: [Dashboard, ProductForm, ProductMedia, SellerOrders, SellerOrderDetail, ActiveCountPipe, ConfirmDialogComponent],
   imports: [
     CommonModule,
     ReactiveFormsModule,

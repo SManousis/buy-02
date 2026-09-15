@@ -66,6 +66,21 @@ export interface ReorderResponse {
   unavailableItems: UnavailableItem[];
 }
 
+/**
+ * Mirrors the backend's forward-only, one-step-at-a-time transition chain
+ * (see OrderStatusService#NEXT_STATUS). Used to drive seller status controls;
+ * the backend remains the source of truth and rejects any other transition.
+ */
+const NEXT_STATUS: Partial<Record<OrderStatus, OrderStatus>> = {
+  PENDING: 'CONFIRMED',
+  CONFIRMED: 'SHIPPED',
+  SHIPPED: 'DELIVERED',
+};
+
+export function nextOrderStatus(status: OrderStatus): OrderStatus | null {
+  return NEXT_STATUS[status] ?? null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class OrderService {
   private base = `${environment.apiBaseUrl}/orders`;
