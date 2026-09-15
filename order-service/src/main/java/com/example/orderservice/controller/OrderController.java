@@ -6,6 +6,7 @@ import com.example.orderservice.dto.OrderResponse;
 import com.example.orderservice.dto.StatusUpdateRequest;
 import com.example.orderservice.model.OrderStatus;
 import com.example.orderservice.service.CheckoutService;
+import com.example.orderservice.service.OrderCancellationService;
 import com.example.orderservice.service.OrderQueryService;
 import com.example.orderservice.service.OrderStatusService;
 import jakarta.validation.Valid;
@@ -22,12 +23,14 @@ public class OrderController {
     private final CheckoutService checkoutService;
     private final OrderQueryService queryService;
     private final OrderStatusService statusService;
+    private final OrderCancellationService cancellationService;
 
     public OrderController(CheckoutService checkoutService, OrderQueryService queryService,
-                            OrderStatusService statusService) {
+                            OrderStatusService statusService, OrderCancellationService cancellationService) {
         this.checkoutService = checkoutService;
         this.queryService = queryService;
         this.statusService = statusService;
+        this.cancellationService = cancellationService;
     }
 
     @PostMapping("/checkout")
@@ -61,6 +64,13 @@ public class OrderController {
                                        @Valid @RequestBody StatusUpdateRequest request) {
         ensureSeller(jwt);
         return OrderResponse.from(statusService.updateStatus(id, jwt.getSubject(), request.status()));
+    }
+
+    @PostMapping("/{id}/cancel")
+    public OrderResponse cancel(@AuthenticationPrincipal Jwt jwt,
+                                 @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken,
+                                 @PathVariable String id) {
+        return OrderResponse.from(cancellationService.cancel(id, jwt.getSubject(), bearerToken));
     }
 
     private void ensureSeller(Jwt jwt) {
