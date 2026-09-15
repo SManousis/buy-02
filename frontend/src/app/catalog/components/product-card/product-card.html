@@ -8,7 +8,9 @@
     <p class="card-desc">{{ product.description | slice:0:80 }}{{ product.description.length > 80 ? '...' : '' }}</p>
     <div class="card-footer">
       <span class="card-price">{{ formattedPrice }}</span>
-      <button class="btn-primary btn-sm">View</button>
+      <button class="btn-primary btn-sm" type="button" (click)="addToCart($event)" [disabled]="product.stock === 0 || adding">
+        {{ adding ? 'Adding…' : 'Add to cart' }}
+      </button>
     </div>
   </div>
 </div>
