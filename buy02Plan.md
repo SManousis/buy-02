@@ -4,6 +4,73 @@ This document plans the buy-02 work on top of the existing buy-01 codebase (Disc
 
 Nothing described here as already built has been re-verified in this pass except by reading source; treat "existing" claims the same way the current README treats its own audit status — confirmed by reading code, not by a runtime run.
 
+## Implementation status and teammate handoff board
+
+This is the shared source of truth for current progress. Update the relevant checkbox in the same PR as the implementation. A phase is complete only when its PR is approved, CI is green, and it is merged into `main`.
+
+- `[x]` means completed and merged, except where a line explicitly says the work is prepared on an open branch.
+- `[ ]` means action is still required.
+
+### Phase 0 - Collaboration and quality infrastructure
+
+- [x] Add GitHub alongside the existing Gitea remote.
+- [x] Replace ngrok with a WSL2 self-hosted GitHub Actions runner for local SonarQube.
+- [x] Protect `main` with PR, approval, and `build-and-analyze` requirements.
+- [x] Configure and verify the Jenkins multibranch pipeline and email notifications.
+- [x] Document the runner flow in `instructions.md` and `SONAR_QUICKSTART.md`.
+
+### Phase 1 - Order-service foundation
+
+- [x] Add `order-service` on port 8084 with MongoDB, Eureka, JWT security, CORS, correlation IDs, and health checks.
+- [x] Add Gateway, Compose, Jenkins, SonarQube, verification, and staging wiring.
+- [x] Merge `feature-order-service-skeleton` after CI and teammate approval.
+
+### Phase 2 - Persistent cart
+
+- [x] Implement the persistent cart model, unique user index, product/stock validation, snapshots, endpoints, error handling, and tests on `feature-cart-api`.
+- [x] Verify the order-service suite: 7 tests passing.
+- [ ] Commit and push `feature-cart-api` to GitHub and Gitea.
+- [ ] Open the cart PR, pass Jenkins and SonarQube, obtain approval, and merge.
+- [ ] Implement the Angular cart page, cart service, controls, subtotal, and header badge in a separate PR.
+- [ ] Verify manually that cart contents and quantities survive browser refresh.
+
+### Phase 3 - Checkout and orders
+
+- [ ] Add the order schema, status history, per-seller checkout, and cash on delivery.
+- [ ] Add atomic stock decrement and restore integration.
+- [ ] Add buyer/seller listing, search, status transitions, cancellation, and reorder.
+- [ ] Add backend tests and buyer/seller Angular pages.
+
+### Phase 4 - Search and filtering
+
+- [ ] Add product keyword, price, seller, stock, sorting, and pagination filters.
+- [ ] Add buyer and seller order search/status filters.
+- [ ] Add responsive Angular search/filter controls.
+
+### Phase 5 - Profile analytics
+
+- [ ] Add buyer top products, most-bought products, and total spent.
+- [ ] Add seller best-selling products and total revenue.
+- [ ] Add buyer and seller Angular analytics panels.
+
+### Phase 6 - Completion and audit
+
+- [ ] Complete responsive-design, validation, security, and negative-path testing.
+- [ ] Record SonarQube findings and fixes.
+- [ ] Update README architecture, routes, database design, Kafka topics, and runtime instructions.
+- [ ] Run and document the Section 10 acceptance scenario.
+- [ ] Confirm every feature PR has green CI and teammate approval.
+- [ ] Implement wishlist and extra payment methods only after required work is complete (bonus).
+
+### Teammate handoff procedure
+
+1. Select the first unchecked implementation item whose dependencies are complete.
+2. Run `git switch main` and `git pull github main`, then create a focused feature branch.
+3. Add tests and update this board in the same PR.
+4. Push to GitHub and Gitea; open the GitHub PR and wait for Jenkins and SonarQube.
+5. Request review, resolve conversations, merge only when green, then synchronize Gitea `main`.
+
+
 ## 0. What buy-01 already gives us
 
 Read from the current source, not assumed:
@@ -14,8 +81,8 @@ Read from the current source, not assumed:
 - **Gateway routing**: one `RouteLocator` entry per service in `api-gateway/src/main/resources/application.yml`, matched by path prefix, resolved via `lb://<service-name>` through Eureka.
 - **Frontend**: standalone-module Angular app (`auth`, `catalog`, `profile`, `seller`, `shared`, `layout`), with `AuthGuard`/`RoleGuard`, an auth token interceptor, and typed services (`auth`, `product`, `media`) under `shared/services`.
 - **Security posture**: BCrypt passwords, JWT-only auth, `403` for wrong role, `404` for cross-owner access (existence-masked), global exception handlers producing a consistent JSON error shape, production HTTPS overlay with HSTS/CSP.
-- **CI/CD**: `Jenkinsfile` builds+tests all 5 Maven modules and the Angular app in parallel, archives artifacts, deploys to staging behind a flag. `.github/workflows/sonarqube.yml` runs backend+frontend SonarQube analysis on push/PR to `main`, gated as a required status check.
-- **Not present yet**: no orders/cart/wishlist code anywhere in the repo, no search/filter query params on `GET /products`, no user- or seller-facing spend/sales aggregation, no `PLAN.md` (the README references one that doesn't exist — out of scope for this plan, but worth restoring before the audit since the README links it four times).
+- **CI/CD**: `Jenkinsfile` builds+tests all 6 Maven modules and the Angular app in parallel, archives artifacts, and deploys to staging behind a flag. `.github/workflows/sonarqube.yml` runs backend+frontend SonarQube analysis on push/PR to `main`, gated as a required status check.
+- **Buy-02 progress**: the `order-service` foundation is merged and the persistent cart API is prepared on `feature-cart-api`. Orders, wishlist, search/filtering, and buyer/seller analytics are not implemented yet. `PLAN.md` is still absent even though the README references it four times.
 
 ## 1. New architecture: `order-service`
 
