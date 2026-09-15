@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '../../shared/services/auth';
 import { MediaService } from '../../shared/services/media';
+import { CartService } from '../../shared/services/cart';
 
 @Component({
   selector: 'app-header',
@@ -15,10 +16,11 @@ export class Header implements OnInit, OnDestroy {
   isSeller = false;
   username = '';
   avatarUrl: string | null = null;
+  cartItemCount = 0;
 
   private destroy$ = new Subject<void>();
 
-  constructor(private auth: AuthService, private media: MediaService, private router: Router) {}
+  constructor(private auth: AuthService, private media: MediaService, private router: Router, private cart: CartService) {}
 
   ngOnInit(): void {
     this.auth.currentUser$
@@ -27,12 +29,16 @@ export class Header implements OnInit, OnDestroy {
         this.isLoggedIn = !!user;
         this.isSeller = user?.role === 'SELLER';
         this.username = user?.username ?? '';
+        if (user) this.cart.refresh(); else this.cart.reset();
       });
     this.auth.currentProfile$
       .pipe(takeUntil(this.destroy$))
       .subscribe(profile => {
         this.avatarUrl = profile?.avatarMediaId ? this.media.getImageUrl(profile.avatarMediaId) : null;
       });
+    this.cart.itemCount$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(count => this.cartItemCount = count);
   }
 
   ngOnDestroy(): void {

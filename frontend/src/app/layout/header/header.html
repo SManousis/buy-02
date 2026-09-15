@@ -23,6 +23,10 @@
         <a *ngIf="isSeller" routerLink="/seller" class="btn-outline btn-sm seller-btn">
           <mat-icon>dashboard</mat-icon> Dashboard
         </a>
+        <a routerLink="/cart" class="cart-link" aria-label="View cart" matBadgeSize="small"
+          [matBadge]="cartItemCount > 0 ? cartItemCount : null" matBadgeColor="accent" matBadgeOverlap="true">
+          <mat-icon>shopping_cart</mat-icon>
+        </a>
         <button mat-icon-button [matMenuTriggerFor]="userMenu" class="avatar-btn">
           <img *ngIf="avatarUrl; else defaultAvatar" class="header-avatar" [src]="avatarUrl" alt="Your avatar">
           <ng-template #defaultAvatar><mat-icon>account_circle</mat-icon></ng-template>

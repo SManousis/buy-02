@@ -43,6 +43,22 @@
 					<mat-icon>{{ product.stock === 0 ? 'remove_shopping_cart' : 'inventory_2' }}</mat-icon>
 					{{ availability }}
 				</p>
+
+				<div class="add-to-cart" *ngIf="canAddToCart">
+					<div class="qty-control">
+						<button type="button" mat-icon-button [disabled]="quantity <= 1" (click)="decrementQuantity()" aria-label="Decrease quantity">
+							<mat-icon>remove</mat-icon>
+						</button>
+						<span class="qty-value">{{ quantity }}</span>
+						<button type="button" mat-icon-button [disabled]="quantity >= (product.stock ?? 1)" (click)="incrementQuantity()" aria-label="Increase quantity">
+							<mat-icon>add</mat-icon>
+						</button>
+					</div>
+					<button type="button" class="btn-primary" [disabled]="addingToCart" (click)="addToCart()">
+						{{ addingToCart ? 'Adding...' : 'Add to cart' }}
+					</button>
+				</div>
+
 				<div class="divider"></div>
 				<h2>About this product</h2>
 				<p class="description">{{ product.description }}</p>

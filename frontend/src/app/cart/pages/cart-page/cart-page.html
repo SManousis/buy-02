@@ -1,0 +1,63 @@
+<div class="container page-wrapper cart-page">
+  <div class="cart-header">
+    <h1>Your Cart</h1>
+  </div>
+
+  <div *ngIf="loading" class="state-center" aria-live="polite">
+    <mat-spinner diameter="48"></mat-spinner>
+  </div>
+
+  <div *ngIf="!loading && loadError" class="empty-dash">
+    <mat-icon>error_outline</mat-icon>
+    <h2>Your cart could not be loaded</h2>
+    <p>Check your connection and try again.</p>
+    <button type="button" class="btn-primary" (click)="load()">Try again</button>
+  </div>
+
+  <div *ngIf="!loading && !loadError && cart && cart.items.length === 0" class="empty-dash">
+    <mat-icon>remove_shopping_cart</mat-icon>
+    <h2>Your cart is empty</h2>
+    <p>Browse our products and add something you like.</p>
+    <a routerLink="/products" class="btn-primary">Browse products</a>
+  </div>
+
+  <div *ngIf="!loading && !loadError && cart && cart.items.length > 0" class="cart-layout">
+    <div class="cart-rows">
+      <div class="cart-row" *ngFor="let item of cart.items">
+        <div class="row-info">
+          <span class="row-name">{{ item.productName }}</span>
+          <span class="row-unit-price">{{ item.unitPriceSnapshot | currency:'EUR' }} each</span>
+        </div>
+
+        <div class="qty-control" [class.busy]="updatingProductId === item.productId">
+          <button type="button" mat-icon-button [disabled]="updatingProductId === item.productId"
+            (click)="decrement(item.productId, item.quantity)" aria-label="Decrease quantity">
+            <mat-icon>remove</mat-icon>
+          </button>
+          <span class="qty-value">{{ item.quantity }}</span>
+          <button type="button" mat-icon-button [disabled]="updatingProductId === item.productId"
+            (click)="increment(item.productId, item.quantity)" aria-label="Increase quantity">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+
+        <span class="row-line-total">{{ item.unitPriceSnapshot * item.quantity | currency:'EUR' }}</span>
+
+        <button type="button" mat-icon-button color="warn" matTooltip="Remove"
+          [disabled]="updatingProductId === item.productId" (click)="remove(item.productId)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <aside class="cart-summary">
+      <h2>Order Summary</h2>
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <span>{{ subtotal | currency:'EUR' }}</span>
+      </div>
+      <p class="summary-note">Shipping and payment details are collected at checkout.</p>
+      <a routerLink="/cart/checkout" class="btn-primary checkout-btn">Proceed to checkout</a>
+    </aside>
+  </div>
+</div>
