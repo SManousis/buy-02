@@ -48,6 +48,7 @@ export class Header implements OnInit, OnDestroy {
 
   logout(): void {
     this.auth.logout();
+    this.cart.reset();
     this.router.navigate(['/']);
   }
 }

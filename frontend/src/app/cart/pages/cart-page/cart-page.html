@@ -1,6 +1,10 @@
 <div class="container page-wrapper cart-page">
   <div class="cart-header">
     <h1>Your Cart</h1>
+    <button *ngIf="cart && cart.items.length > 0" type="button" class="clear-cart"
+      [disabled]="updatingProductId !== null" (click)="clear()">
+      Clear cart
+    </button>
   </div>
 
   <div *ngIf="loading" class="state-center" aria-live="polite">
@@ -23,9 +27,9 @@
 
   <div *ngIf="!loading && !loadError && cart && cart.items.length > 0" class="cart-layout">
     <div class="cart-rows">
-      <div class="cart-row" *ngFor="let item of cart.items">
+      <div class="cart-row" *ngFor="let item of cart.items; trackBy: trackByProductId">
         <div class="row-info">
-          <span class="row-name">{{ item.productName }}</span>
+          <a class="row-name" [routerLink]="['/products', item.productId]">{{ item.productName }}</a>
           <span class="row-unit-price">{{ item.unitPriceSnapshot | currency:'EUR' }} each</span>
         </div>
 

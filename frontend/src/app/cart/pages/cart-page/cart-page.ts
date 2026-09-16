@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject, takeUntil, timeout } from 'rxjs';
-import { Cart, CartService } from '../../../shared/services/cart';
+import { Cart, CartItem, CartService } from '../../../shared/services/cart';
 
 @Component({
   selector: 'app-cart-page',
@@ -81,6 +81,25 @@ export class CartPage implements OnInit, OnDestroy {
         },
         error: (error) => this.handleItemError(error),
       });
+  }
+
+  clear(): void {
+    if (this.updatingProductId) return;
+    this.updatingProductId = 'all';
+    this.cartService.clear()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.updatingProductId = null;
+          this.load();
+          this.snack.open('Cart cleared.', 'Close', { duration: 2500, panelClass: 'snack-success' });
+        },
+        error: (error) => this.handleItemError(error),
+      });
+  }
+
+  trackByProductId(_index: number, item: CartItem): string {
+    return item.productId;
   }
 
   private changeQuantity(productId: string, quantity: number): void {

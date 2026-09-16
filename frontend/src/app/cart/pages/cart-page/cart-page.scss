@@ -1,7 +1,20 @@
 .cart-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
   padding: 36px 0 24px;
 
   h1 { font-size: 28px; font-weight: 800; margin: 0; }
+
+  .clear-cart {
+    background: none;
+    border: 0;
+    color: var(--color-danger);
+    cursor: pointer;
+    font-size: 14px;
+
+    &:disabled { cursor: default; opacity: .5; }
+  }
 }
 
 .state-center {
@@ -54,7 +67,14 @@
   gap: 2px;
   min-width: 0;
 
-  .row-name { font-weight: 600; font-size: 15px; }
+  .row-name {
+    color: var(--color-text);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover { color: var(--color-primary); }
+  }
   .row-unit-price { font-size: 12px; color: var(--color-muted); }
 }
 

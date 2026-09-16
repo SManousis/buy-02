@@ -16,7 +16,7 @@ services:
     ports:
       # Ports published by the nested staging application are exposed here.
       - "8081:8080"
-      - "4200:4200"
+      - "4300:4200"
 
   jenkins:
     build:
@@ -32,7 +32,8 @@ services:
       DOCKER_CERT_PATH: /certs/client
       DOCKER_TLS_VERIFY: "1"
     ports:
-      - "8080:8080"
+      # Use 8090 on the host because port 8080 is reserved by another local application.
+      - "8090:8080"
       - "50000:50000"
     volumes:
       - jenkins_home:/var/jenkins_home

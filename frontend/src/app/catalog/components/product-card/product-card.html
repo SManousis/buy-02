@@ -8,7 +8,13 @@
     <p class="card-desc">{{ product.description | slice:0:80 }}{{ product.description.length > 80 ? '...' : '' }}</p>
     <div class="card-footer">
       <span class="card-price">{{ formattedPrice }}</span>
-      <button class="btn-primary btn-sm">View</button>
+      <button *ngIf="canAddToCart; else viewButton" class="btn-primary btn-sm" type="button"
+        (click)="addToCart($event)" [disabled]="addingToCart">
+        {{ addingToCart ? 'Adding...' : 'Add to cart' }}
+      </button>
+      <ng-template #viewButton>
+        <button class="btn-primary btn-sm" type="button">View</button>
+      </ng-template>
     </div>
   </div>
 </div>
