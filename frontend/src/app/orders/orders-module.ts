@@ -11,6 +11,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { OrdersRoutingModule } from './orders-routing-module';
 import { OrderHistory } from './pages/order-history/order-history';
 import { OrderDetail } from './pages/order-detail/order-detail';
+import { SharedModule } from '../shared/shared-module';
 
 @NgModule({
   declarations: [OrderHistory, OrderDetail],
@@ -18,6 +19,7 @@ import { OrderDetail } from './pages/order-detail/order-detail';
     CommonModule,
     RouterModule,
     OrdersRoutingModule,
+    SharedModule,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,

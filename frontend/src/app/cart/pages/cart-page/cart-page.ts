@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject, takeUntil, timeout } from 'rxjs';
 import { Cart, CartItem, CartService } from '../../../shared/services/cart';
+import { serverMessage } from '../../../shared/services/http-error';
 
 @Component({
   selector: 'app-cart-page',
@@ -123,16 +124,10 @@ export class CartPage implements OnInit, OnDestroy {
     const status = error instanceof HttpErrorResponse ? error.status : 0;
     let message = 'Could not update your cart. Try again.';
     if (status === 404) message = 'That item is no longer in your cart. Refreshing…';
-    else if (status === 409) message = this.serverMessage(error) ?? 'Not enough stock available for that quantity.';
+    else if (status === 409) message = serverMessage(error) ?? 'Not enough stock available for that quantity.';
     else if (status === 0) message = 'Cannot reach the server. Check your connection.';
     this.snack.open(message, 'Close', { duration: 4000, panelClass: 'snack-error' });
     this.load();
   }
 
-  private serverMessage(error: unknown): string | null {
-    if (error instanceof HttpErrorResponse && typeof error.error?.message === 'string') {
-      return error.error.message;
-    }
-    return null;
-  }
 }

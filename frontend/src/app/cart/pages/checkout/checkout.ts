@@ -6,6 +6,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject, takeUntil, timeout } from 'rxjs';
 import { Cart, CartService } from '../../../shared/services/cart';
 import { CheckoutResponse, OrderService } from '../../../shared/services/order';
+import { serverMessage } from '../../../shared/services/http-error';
 
 @Component({
   selector: 'app-checkout',
@@ -104,18 +105,12 @@ export class Checkout implements OnInit, OnDestroy {
     this.changeDetector.detectChanges();
     const status = error instanceof HttpErrorResponse ? error.status : 0;
     let message = 'Could not place your order. Try again.';
-    if (status === 400) message = this.serverMessage(error) ?? 'Your cart is empty. Add items before checking out.';
-    else if (status === 409) message = this.serverMessage(error) ?? 'One of your items is no longer available at that quantity.';
+    if (status === 400) message = serverMessage(error) ?? 'Your cart is empty. Add items before checking out.';
+    else if (status === 409) message = serverMessage(error) ?? 'One of your items is no longer available at that quantity.';
     else if (status === 503) message = 'Product service is temporarily unavailable. Try again shortly.';
     else if (status === 0) message = 'Cannot reach the server. Check your connection.';
     this.snack.open(message, 'Close', { duration: 5000, panelClass: 'snack-error' });
     if (status === 400 || status === 409) this.load();
   }
 
-  private serverMessage(error: unknown): string | null {
-    if (error instanceof HttpErrorResponse && typeof error.error?.message === 'string') {
-      return error.error.message;
-    }
-    return null;
-  }
 }

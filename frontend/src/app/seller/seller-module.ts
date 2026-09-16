@@ -20,6 +20,7 @@ import { SellerOrders } from './pages/orders/orders';
 import { SellerOrderDetail } from './pages/order-detail/order-detail';
 import { ConfirmDialogComponent } from '../shared/components/confirm-dialog/confirm-dialog';
 import { Product } from '../shared/services/product';
+import { SharedModule } from '../shared/shared-module';
 
 @Pipe({ name: 'activeCount', standalone: false })
 export class ActiveCountPipe implements PipeTransform {
@@ -35,6 +36,7 @@ export class ActiveCountPipe implements PipeTransform {
     ReactiveFormsModule,
     RouterModule,
     SellerRoutingModule,
+    SharedModule,
     MatButtonModule,
     MatIconModule,
     MatFormFieldModule,

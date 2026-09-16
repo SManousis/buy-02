@@ -1,12 +1,12 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { HttpErrorResponse } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject, takeUntil } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Product, ProductService } from '../../../shared/services/product';
 import { AuthService } from '../../../shared/services/auth';
 import { CartService } from '../../../shared/services/cart';
+import { addToCartErrorMessage } from '../../../shared/services/http-error';
 
 @Component({
   selector: 'app-product-detail',
@@ -89,20 +89,9 @@ export class ProductDetail implements OnInit, OnDestroy {
         error: (error) => {
           this.addingToCart = false;
           this.changeDetector.detectChanges();
-          this.snack.open(this.addToCartErrorMessage(error), 'Close', { duration: 4000, panelClass: 'snack-error' });
+          this.snack.open(addToCartErrorMessage(error), 'Close', { duration: 4000, panelClass: 'snack-error' });
         },
       });
-  }
-
-  private addToCartErrorMessage(error: unknown): string {
-    const status = error instanceof HttpErrorResponse ? error.status : 0;
-    if (status === 409) {
-      const message = error instanceof HttpErrorResponse && typeof error.error?.message === 'string' ? error.error.message : null;
-      return message ?? 'Not enough stock available for that quantity.';
-    }
-    if (status === 404) return 'This product is no longer available.';
-    if (status === 0) return 'Cannot reach the server. Check your connection.';
-    return 'Could not add this item to your cart. Try again.';
   }
 
   selectImage(index: number): void {

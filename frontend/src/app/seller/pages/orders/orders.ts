@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject, takeUntil, timeout } from 'rxjs';
 import { Order, OrderStatus, OrderService, nextOrderStatus } from '../../../shared/services/order';
+import { serverMessage } from '../../../shared/services/http-error';
 
 const STATUS_FILTERS: { value: OrderStatus | ''; label: string }[] = [
   { value: '', label: 'All orders' },
@@ -117,18 +118,12 @@ export class SellerOrders implements OnInit, OnDestroy {
 
   private statusErrorMessage(error: unknown): string {
     const status = error instanceof HttpErrorResponse ? error.status : 0;
-    if (status === 400) return this.serverMessage(error) ?? 'That status change is not allowed from the order\'s current state.';
+    if (status === 400) return serverMessage(error) ?? 'That status change is not allowed from the order\'s current state.';
     if (status === 404) return 'This order no longer exists or is not yours.';
     if (status === 403) return 'You do not have permission to update this order.';
-    if (status === 409) return this.serverMessage(error) ?? 'This order was just updated elsewhere. Refreshing…';
+    if (status === 409) return serverMessage(error) ?? 'This order was just updated elsewhere. Refreshing…';
     if (status === 0) return 'Cannot reach the server. Check your connection.';
     return 'Could not update this order. Try again.';
   }
 
-  private serverMessage(error: unknown): string | null {
-    if (error instanceof HttpErrorResponse && typeof error.error?.message === 'string') {
-      return error.error.message;
-    }
-    return null;
-  }
 }
