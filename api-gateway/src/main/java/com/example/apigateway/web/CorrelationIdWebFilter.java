@@ -35,7 +35,7 @@ public class CorrelationIdWebFilter implements WebFilter {
         });
         // Defer the chain so even synchronous filter code runs with the restored MDC.
         return Mono.defer(() -> chain.filter(tracedExchange))
-                .contextWrite(context -> context.put(CorrelationIdThreadLocalAccessor.KEY, correlationId));
+                .contextWrite(context -> context.put(CorrelationIdThreadLocalAccessor.CONTEXT_KEY, correlationId));
     }
 
     private String validOrNew(String requestedId) {
