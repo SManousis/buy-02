@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { FormsModule } from '@angular/forms';
 
 import { CatalogRoutingModule } from './catalog-routing-module';
 import { Home } from './pages/home/home';
@@ -16,6 +17,7 @@ import { ProductCard } from './components/product-card/product-card';
   declarations: [Home, ProductList, ProductDetail, ProductCard],
   imports: [
     CommonModule,
+    FormsModule,
     RouterModule,
     CatalogRoutingModule,
     MatIconModule,

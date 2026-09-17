@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -21,6 +21,17 @@ export interface CreateProductRequest {
   stock?: number;
 }
 
+export interface ProductFilters {
+  q?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  sellerId?: string;
+  inStock?: boolean;
+  sort?: 'newest' | 'price_asc' | 'price_desc';
+  page?: number;
+  size?: number;
+}
+
 type ProductPayload = Omit<Product, 'imageIds'> & {
   imageIds?: string[];
   imageUrls?: string[];
@@ -32,8 +43,12 @@ export class ProductService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<Product[]> {
-    return this.http.get<ProductPayload[]>(this.base)
+  getAll(filters: ProductFilters = {}): Observable<Product[]> {
+    let params = new HttpParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') params = params.set(key, String(value));
+    });
+    return this.http.get<ProductPayload[]>(this.base, { params })
       .pipe(map((products) => products.map((product) => this.normalizeProduct(product))));
   }
 

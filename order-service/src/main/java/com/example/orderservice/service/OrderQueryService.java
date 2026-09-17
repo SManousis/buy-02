@@ -16,15 +16,37 @@ public class OrderQueryService {
     }
 
     public List<Order> listMine(String buyerId, OrderStatus status) {
-        return status == null
+        return listMine(buyerId, status, null);
+    }
+
+    public List<Order> listMine(String buyerId, OrderStatus status, String keyword) {
+        return filter(status == null
                 ? repository.findByBuyerIdOrderByCreatedAtDesc(buyerId)
-                : repository.findByBuyerIdAndStatusOrderByCreatedAtDesc(buyerId, status);
+                : repository.findByBuyerIdAndStatusOrderByCreatedAtDesc(buyerId, status), keyword);
     }
 
     public List<Order> listSelling(String sellerId, OrderStatus status) {
-        return status == null
+        return listSelling(sellerId, status, null);
+    }
+
+    public List<Order> listSelling(String sellerId, OrderStatus status, String keyword) {
+        return filter(status == null
                 ? repository.findBySellerIdOrderByCreatedAtDesc(sellerId)
-                : repository.findBySellerIdAndStatusOrderByCreatedAtDesc(sellerId, status);
+                : repository.findBySellerIdAndStatusOrderByCreatedAtDesc(sellerId, status), keyword);
+    }
+
+    private List<Order> filter(List<Order> orders, String keyword) {
+        if (keyword == null || keyword.isBlank()) return orders;
+        String term = keyword.trim().toLowerCase(java.util.Locale.ROOT);
+        return orders.stream().filter(order ->
+                contains(order.getId(), term)
+                || contains(order.getBuyerId(), term)
+                || order.getItems().stream().anyMatch(item -> contains(item.name(), term)))
+                .toList();
+    }
+
+    private boolean contains(String value, String term) {
+        return value != null && value.toLowerCase(java.util.Locale.ROOT).contains(term);
     }
 
     /**

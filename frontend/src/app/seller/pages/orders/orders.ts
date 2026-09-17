@@ -13,7 +13,6 @@ import { OrderListPageBase } from '../../../shared/components/order-list-page-ba
   styleUrl: './orders.scss',
 })
 export class SellerOrders extends OrderListPageBase {
-  searchText = '';
   updatingId: string | null = null;
 
   constructor(
@@ -62,7 +61,7 @@ export class SellerOrders extends OrderListPageBase {
   }
 
   protected override fetch(): Observable<Order[]> {
-    return this.orderService.selling(this.selectedStatus || undefined);
+    return this.orderService.selling(this.selectedStatus || undefined, this.searchText);
   }
 
   private statusErrorMessage(error: unknown): string {

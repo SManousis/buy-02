@@ -113,12 +113,12 @@ export class OrderService {
     return this.http.post<CheckoutResponse>(`${this.base}/checkout`, request);
   }
 
-  mine(status?: OrderStatus): Observable<Order[]> {
-    return this.http.get<Order[]>(`${this.base}/mine`, { params: this.statusParams(status) });
+  mine(status?: OrderStatus, q?: string): Observable<Order[]> {
+    return this.http.get<Order[]>(`${this.base}/mine`, { params: this.listParams(status, q) });
   }
 
-  selling(status?: OrderStatus): Observable<Order[]> {
-    return this.http.get<Order[]>(`${this.base}/selling`, { params: this.statusParams(status) });
+  selling(status?: OrderStatus, q?: string): Observable<Order[]> {
+    return this.http.get<Order[]>(`${this.base}/selling`, { params: this.listParams(status, q) });
   }
 
   getById(id: string): Observable<Order> {
@@ -145,7 +145,10 @@ export class OrderService {
     return this.http.get<SellerStats>(`${this.base}/stats/selling`);
   }
 
-  private statusParams(status?: OrderStatus): HttpParams {
-    return status ? new HttpParams().set('status', status) : new HttpParams();
+  private listParams(status?: OrderStatus, q?: string): HttpParams {
+    let params = new HttpParams();
+    if (status) params = params.set('status', status);
+    if (q?.trim()) params = params.set('q', q.trim());
+    return params;
   }
 }

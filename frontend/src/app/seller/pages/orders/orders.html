@@ -6,7 +6,7 @@
     </div>
     <div class="dash-actions">
       <input type="search" class="search-input" placeholder="Search by order, buyer, or product"
-        [value]="searchText" (input)="searchText = $any($event.target).value">
+        [value]="searchText" (input)="onSearchChange($any($event.target).value)">
       <app-order-status-filter [value]="selectedStatus" (valueChange)="onStatusChange($event)"></app-order-status-filter>
     </div>
   </div>

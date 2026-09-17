@@ -24,6 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.math.BigDecimal;
+import java.util.regex.Pattern;
+import org.springframework.data.domain.Sort;
 
 @Service
 @Transactional(readOnly = true)
@@ -68,6 +71,48 @@ public class ProductService {
         return productRepository.findAll().stream()
                 .map(ProductResponse::from)
                 .toList();
+    }
+
+    public List<ProductResponse> searchProducts(String keyword, BigDecimal minPrice, BigDecimal maxPrice,
+                                                 String sellerId, Boolean inStock, String sort,
+                                                 int page, int size) {
+        validateSearch(minPrice, maxPrice, page, size);
+        Query query = new Query();
+        if (keyword != null && !keyword.isBlank()) {
+            String escaped = Pattern.quote(keyword.trim());
+            query.addCriteria(new Criteria().orOperator(
+                    Criteria.where("name").regex(escaped, "i"),
+                    Criteria.where("description").regex(escaped, "i")));
+        }
+        if (minPrice != null || maxPrice != null) {
+            Criteria price = Criteria.where("price");
+            if (minPrice != null) price = price.gte(minPrice);
+            if (maxPrice != null) price = price.lte(maxPrice);
+            query.addCriteria(price);
+        }
+        if (sellerId != null && !sellerId.isBlank()) query.addCriteria(Criteria.where("sellerId").is(sellerId.trim()));
+        if (Boolean.TRUE.equals(inStock)) query.addCriteria(Criteria.where("stock").gt(0));
+        query.with(productSort(sort)).skip((long) page * size).limit(size);
+        return mongoTemplate.find(query, Product.class).stream().map(ProductResponse::from).toList();
+    }
+
+    private void validateSearch(BigDecimal minPrice, BigDecimal maxPrice, int page, int size) {
+        if (minPrice != null && minPrice.signum() < 0 || maxPrice != null && maxPrice.signum() < 0) {
+            throw new IllegalArgumentException("Price filters must not be negative");
+        }
+        if (minPrice != null && maxPrice != null && minPrice.compareTo(maxPrice) > 0) {
+            throw new IllegalArgumentException("Minimum price must not exceed maximum price");
+        }
+        if (page < 0 || size < 1 || size > 100) throw new IllegalArgumentException("Invalid pagination values");
+    }
+
+    private Sort productSort(String value) {
+        return switch (value == null ? "newest" : value) {
+            case "price_asc" -> Sort.by(Sort.Direction.ASC, "price");
+            case "price_desc" -> Sort.by(Sort.Direction.DESC, "price");
+            case "newest" -> Sort.by(Sort.Direction.DESC, "createdAt");
+            default -> throw new IllegalArgumentException("Unsupported product sort: " + value);
+        };
     }
 
     public List<ProductResponse> listProductsBySeller(String sellerId) {

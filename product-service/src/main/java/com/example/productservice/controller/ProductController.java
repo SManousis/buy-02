@@ -16,6 +16,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/products")
@@ -25,8 +26,16 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping
-    public List<ProductResponse> listProducts() {
-        return productService.listProducts();
+    public List<ProductResponse> listProducts(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) String sellerId,
+            @RequestParam(required = false) Boolean inStock,
+            @RequestParam(defaultValue = "newest") String sort,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "24") int size) {
+        return productService.searchProducts(q, minPrice, maxPrice, sellerId, inStock, sort, page, size);
     }
 
     // Must be declared before /{id} so Spring prefers this exact match

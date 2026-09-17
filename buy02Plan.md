@@ -45,9 +45,12 @@ This is the shared source of truth for current progress. Update the relevant che
 
 ### Phase 4 - Search and filtering
 
-- [ ] Add product keyword, price, seller, stock, sorting, and pagination filters.
-- [ ] Add buyer and seller order search/status filters.
-- [ ] Add responsive Angular search/filter controls.
+**Status:** Implemented and verified on `feature-phase4-search-filtering`; awaiting CI, review, and merge.
+
+- [x] Add product keyword, price, seller, stock, sorting, and pagination filters.
+- [x] Add buyer and seller order search/status filters.
+- [x] Add responsive Angular search/filter controls.
+- [x] Verify product-service, order-service (38 tests), and Angular (145 tests) locally in WSL.
 
 ### Phase 5 - Profile analytics
 
