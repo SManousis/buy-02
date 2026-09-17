@@ -32,6 +32,11 @@ export interface ProductFilters {
   size?: number;
 }
 
+export interface SellerSummary {
+  id: string;
+  username: string;
+}
+
 type ProductPayload = Omit<Product, 'imageIds'> & {
   imageIds?: string[];
   imageUrls?: string[];
@@ -50,6 +55,10 @@ export class ProductService {
     });
     return this.http.get<ProductPayload[]>(this.base, { params })
       .pipe(map((products) => products.map((product) => this.normalizeProduct(product))));
+  }
+
+  getSellers(): Observable<SellerSummary[]> {
+    return this.http.get<SellerSummary[]>(`${environment.apiBaseUrl}/sellers`);
   }
 
   getById(id: string): Observable<Product> {

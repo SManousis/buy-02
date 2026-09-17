@@ -17,7 +17,9 @@ describe('ProductList', () => {
       imports: [CatalogModule],
       providers: [
         provideRouter([]),
-        { provide: ProductService, useValue: { getAll: () => getAll() } },
+        { provide: ProductService, useValue: { getAll: () => getAll(), getSellers: () => of([
+          { id: 'seller-1', username: 'Alice Store' },
+        ]) } },
       ],
     }).compileComponents();
 
@@ -48,6 +50,7 @@ describe('ProductList', () => {
 
     expect(fixture.nativeElement.textContent).toContain('Olive oil');
     expect(fixture.nativeElement.querySelectorAll('app-product-card').length).toBe(1);
+    expect(fixture.nativeElement.textContent).toContain('Alice Store');
   });
 
   it('shows an error message and retries when the catalog request fails', () => {

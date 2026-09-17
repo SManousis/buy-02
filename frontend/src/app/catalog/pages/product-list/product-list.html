@@ -15,8 +15,10 @@
 				[(ngModel)]="filters.minPrice" (ngModelChange)="applyFilters()"></label>
 			<label><span>Maximum price</span><input type="number" min="0" step="0.01"
 				[(ngModel)]="filters.maxPrice" (ngModelChange)="applyFilters()"></label>
-			<label><span>Seller ID</span><input type="text" [(ngModel)]="filters.sellerId"
-				(ngModelChange)="applyFilters()"></label>
+			<label><span>Seller</span><select [(ngModel)]="filters.sellerId" (ngModelChange)="applyFilters()">
+				<option value="">All sellers</option>
+				<option *ngFor="let seller of sellers" [value]="seller.id">{{ seller.username }}</option>
+			</select></label>
 			<label><span>Sort by</span><select [(ngModel)]="filters.sort" (ngModelChange)="loadProducts()">
 				<option value="newest">Newest</option><option value="price_asc">Price: low to high</option>
 				<option value="price_desc">Price: high to low</option>
