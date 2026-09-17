@@ -1,14 +1,17 @@
 package com.example.orderservice.controller;
 
+import com.example.orderservice.dto.BuyerStatsResponse;
 import com.example.orderservice.dto.CheckoutRequest;
 import com.example.orderservice.dto.CheckoutResponse;
 import com.example.orderservice.dto.OrderResponse;
 import com.example.orderservice.dto.ReorderResponse;
+import com.example.orderservice.dto.SellerStatsResponse;
 import com.example.orderservice.dto.StatusUpdateRequest;
 import com.example.orderservice.model.OrderStatus;
 import com.example.orderservice.service.CheckoutService;
 import com.example.orderservice.service.OrderCancellationService;
 import com.example.orderservice.service.OrderQueryService;
+import com.example.orderservice.service.OrderStatsService;
 import com.example.orderservice.service.OrderStatusService;
 import com.example.orderservice.service.ReorderService;
 import jakarta.validation.Valid;
@@ -27,15 +30,17 @@ public class OrderController {
     private final OrderStatusService statusService;
     private final OrderCancellationService cancellationService;
     private final ReorderService reorderService;
+    private final OrderStatsService statsService;
 
     public OrderController(CheckoutService checkoutService, OrderQueryService queryService,
                             OrderStatusService statusService, OrderCancellationService cancellationService,
-                            ReorderService reorderService) {
+                            ReorderService reorderService, OrderStatsService statsService) {
         this.checkoutService = checkoutService;
         this.queryService = queryService;
         this.statusService = statusService;
         this.cancellationService = cancellationService;
         this.reorderService = reorderService;
+        this.statsService = statsService;
     }
 
     @PostMapping("/checkout")
@@ -57,6 +62,18 @@ public class OrderController {
                                         @RequestParam(required = false) OrderStatus status) {
         ensureSeller(jwt);
         return queryService.listSelling(jwt.getSubject(), status).stream().map(OrderResponse::from).toList();
+    }
+
+    /** Statistics are always scoped to the JWT subject; there is no way to request another user's figures. */
+    @GetMapping("/stats/me")
+    public BuyerStatsResponse myStats(@AuthenticationPrincipal Jwt jwt) {
+        return statsService.buyerStats(jwt.getSubject());
+    }
+
+    @GetMapping("/stats/selling")
+    public SellerStatsResponse sellingStats(@AuthenticationPrincipal Jwt jwt) {
+        ensureSeller(jwt);
+        return statsService.sellerStats(jwt.getSubject());
     }
 
     @GetMapping("/{id}")

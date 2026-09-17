@@ -101,4 +101,26 @@ describe('OrderService', () => {
     expect(request.request.method).toBe('POST');
     request.flush({ cart: { id: 'cart-1', items: [], subtotal: 0, updatedAt: '2024-01-01T00:00:00Z' }, unavailableItems: [] });
   });
+
+  it('loads the buyer statistics', () => {
+    let totalSpent: number | undefined;
+    service.statsMine().subscribe((stats) => totalSpent = stats.totalSpent);
+
+    const request = http.expectOne('http://localhost:8080/orders/stats/me');
+    expect(request.request.method).toBe('GET');
+    request.flush({ topProducts: [], mostBoughtProducts: [], totalSpent: 60, orderCount: 3 });
+
+    expect(totalSpent).toBe(60);
+  });
+
+  it('loads the seller statistics', () => {
+    let totalRevenue: number | undefined;
+    service.statsSelling().subscribe((stats) => totalRevenue = stats.totalRevenue);
+
+    const request = http.expectOne('http://localhost:8080/orders/stats/selling');
+    expect(request.request.method).toBe('GET');
+    request.flush({ bestSellingProducts: [], totalRevenue: 65, orderCount: 3 });
+
+    expect(totalRevenue).toBe(65);
+  });
 });

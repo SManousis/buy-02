@@ -1,0 +1,28 @@
+<section class="stats-section" aria-labelledby="seller-stats-heading">
+  <h2 id="seller-stats-heading">Your sales</h2>
+
+  <app-load-state [loading]="loading" [error]="loadError" errorTitle="Your sales stats could not be loaded"
+    (retry)="load()"></app-load-state>
+
+  <ng-container *ngIf="!loading && !loadError && stats">
+    <p *ngIf="stats.orderCount === 0" class="stats-empty">
+      No sales yet. Your revenue and best-selling products will show up here once buyers order from you.
+    </p>
+
+    <ng-container *ngIf="stats.orderCount > 0">
+      <div class="stat-tiles">
+        <div class="stat-tile">
+          <span class="stat-label">Total revenue</span>
+          <span class="stat-value">{{ stats.totalRevenue | currency:'EUR' }}</span>
+        </div>
+        <div class="stat-tile">
+          <span class="stat-label">Orders</span>
+          <span class="stat-value">{{ stats.orderCount }}</span>
+        </div>
+      </div>
+
+      <app-product-stat-list heading="Best-selling products" [products]="stats.bestSellingProducts"
+        measure="quantity" quantityLabel="sold"></app-product-stat-list>
+    </ng-container>
+  </ng-container>
+</section>

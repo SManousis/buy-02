@@ -1,0 +1,32 @@
+<section class="stats-section" aria-labelledby="buyer-stats-heading">
+  <h2 id="buyer-stats-heading">Your purchases</h2>
+
+  <app-load-state [loading]="loading" [error]="loadError" errorTitle="Your purchase stats could not be loaded"
+    (retry)="load()"></app-load-state>
+
+  <ng-container *ngIf="!loading && !loadError && stats">
+    <p *ngIf="stats.orderCount === 0" class="stats-empty">
+      No purchases yet. Your spending and favourite products will show up here after your first order.
+    </p>
+
+    <ng-container *ngIf="stats.orderCount > 0">
+      <div class="stat-tiles">
+        <div class="stat-tile">
+          <span class="stat-label">Total spent</span>
+          <span class="stat-value">{{ stats.totalSpent | currency:'EUR' }}</span>
+        </div>
+        <div class="stat-tile">
+          <span class="stat-label">Orders</span>
+          <span class="stat-value">{{ stats.orderCount }}</span>
+        </div>
+      </div>
+
+      <div class="stat-lists">
+        <app-product-stat-list heading="Top products" [products]="stats.topProducts"
+          measure="amount" quantityLabel="bought"></app-product-stat-list>
+        <app-product-stat-list heading="Most bought" [products]="stats.mostBoughtProducts"
+          measure="quantity" quantityLabel="bought"></app-product-stat-list>
+      </div>
+    </ng-container>
+  </ng-container>
+</section>

@@ -7,16 +7,19 @@ import { Observable, of, throwError } from 'rxjs';
 import { ProfileModule } from '../../profile-module';
 import { AuthService, UpdateProfileRequest } from '../../../shared/services/auth';
 import { MediaService } from '../../../shared/services/media';
+import { OrderService } from '../../../shared/services/order';
 import { Profile } from './profile';
 
 describe('Profile', () => {
   let component: Profile;
   let fixture: ComponentFixture<Profile>;
+  let role: 'SELLER' | 'CLIENT';
   let updateRequests: UpdateProfileRequest[];
   let updateResult: (request: UpdateProfileRequest) => Observable<unknown>;
   let snackMessages: string[];
 
   beforeEach(async () => {
+    role = 'SELLER';
     updateRequests = [];
     snackMessages = [];
     updateResult = (request) => of({
@@ -32,7 +35,7 @@ describe('Profile', () => {
           provide: AuthService,
           useValue: {
             getProfile: () => of({
-              id: 'seller-1', username: 'Ariadne', email: 'ariadne@example.com', role: 'SELLER',
+              id: 'seller-1', username: 'Ariadne', email: 'ariadne@example.com', role,
               avatarMediaId: 'avatar-1', createdAt: '2026-09-03T00:00:00Z',
             }),
             updateProfile: (request: UpdateProfileRequest) => {
@@ -46,6 +49,13 @@ describe('Profile', () => {
           useValue: {
             upload: () => of({ id: 'avatar-2', url: '/media/images/avatar-2', originalFileName: 'avatar.png', contentType: 'image/png', size: 4 }),
             getImageUrl: (id: string) => `/media/images/${id}`,
+          },
+        },
+        {
+          provide: OrderService,
+          useValue: {
+            statsMine: () => of({ topProducts: [], mostBoughtProducts: [], totalSpent: 0, orderCount: 0 }),
+            statsSelling: () => of({ bestSellingProducts: [], totalRevenue: 0, orderCount: 0 }),
           },
         },
         { provide: MatSnackBar, useValue: { open: (message: string) => snackMessages.push(message) } },
@@ -111,5 +121,20 @@ describe('Profile', () => {
 
     expect(component.form.get('username')?.hasError('server')).toBe(false);
     expect(snackMessages).toContain('Could not update your profile.');
+  });
+
+  it('shows the sales panel to a seller', () => {
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-seller-stats')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('app-buyer-stats')).toBeNull();
+  });
+
+  it('shows the purchases panel to a buyer', () => {
+    role = 'CLIENT';
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-buyer-stats')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('app-seller-stats')).toBeNull();
   });
 });
