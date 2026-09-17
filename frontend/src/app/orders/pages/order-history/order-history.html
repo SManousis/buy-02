@@ -5,6 +5,8 @@
       <p class="dash-sub">Track, cancel, or reorder past purchases</p>
     </div>
     <div class="dash-actions">
+      <input type="search" class="search-input" placeholder="Search by order or product"
+        [value]="searchText" (input)="onSearchChange($any($event.target).value)">
       <app-order-status-filter [value]="selectedStatus" (valueChange)="onStatusChange($event)"></app-order-status-filter>
     </div>
   </div>
@@ -14,7 +16,7 @@
 
   <div *ngIf="!loading && !loadError && orders.length === 0" class="empty-dash">
     <mat-icon>receipt_long</mat-icon>
-    <h2>No orders {{ selectedStatus ? 'with this status' : 'yet' }}</h2>
+    <h2>No orders match your search</h2>
     <p>Once you check out, your orders will show up here.</p>
     <a routerLink="/products" class="btn-primary">Browse products</a>
   </div>

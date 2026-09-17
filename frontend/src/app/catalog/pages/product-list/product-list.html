@@ -5,6 +5,27 @@
 			<h1>Products</h1>
 		</header>
 
+		<section class="filters" aria-label="Product filters">
+			<label class="search-field">
+				<span>Search</span>
+				<input type="search" [(ngModel)]="filters.q" (ngModelChange)="applyFilters()"
+					placeholder="Name or description">
+			</label>
+			<label><span>Minimum price</span><input type="number" min="0" step="0.01"
+				[(ngModel)]="filters.minPrice" (ngModelChange)="applyFilters()"></label>
+			<label><span>Maximum price</span><input type="number" min="0" step="0.01"
+				[(ngModel)]="filters.maxPrice" (ngModelChange)="applyFilters()"></label>
+			<label><span>Seller ID</span><input type="text" [(ngModel)]="filters.sellerId"
+				(ngModelChange)="applyFilters()"></label>
+			<label><span>Sort by</span><select [(ngModel)]="filters.sort" (ngModelChange)="loadProducts()">
+				<option value="newest">Newest</option><option value="price_asc">Price: low to high</option>
+				<option value="price_desc">Price: high to low</option>
+			</select></label>
+			<label class="check-field"><input type="checkbox" [(ngModel)]="filters.inStock"
+				(ngModelChange)="loadProducts()"><span>In stock only</span></label>
+			<button type="button" class="btn-outline" (click)="clearFilters()">Clear</button>
+		</section>
+
 		<div *ngIf="loading" class="state-message">
 			<mat-spinner diameter="40"></mat-spinner>
 			<p>Loading products...</p>
@@ -19,10 +40,15 @@
 		<div *ngIf="!loading && !error && products.length > 0" class="product-grid">
 			<app-product-card *ngFor="let product of products" [product]="product"></app-product-card>
 		</div>
+		<nav *ngIf="!loading && !error && ((filters.page ?? 0) > 0 || canLoadNext)" class="pagination" aria-label="Catalog pages">
+			<button type="button" class="btn-outline" [disabled]="(filters.page ?? 0) === 0" (click)="changePage(-1)">Previous</button>
+			<span>Page {{ (filters.page ?? 0) + 1 }}</span>
+			<button type="button" class="btn-outline" [disabled]="!canLoadNext" (click)="changePage(1)">Next</button>
+		</nav>
 
 		<div *ngIf="!loading && !error && products.length === 0" class="state-message">
 			<mat-icon>storefront</mat-icon>
-			<p>No products are available yet.</p>
+			<p>{{ hasActiveFilters ? 'No products match these filters.' : 'No products are available yet.' }}</p>
 		</div>
 	</div>
 </section>

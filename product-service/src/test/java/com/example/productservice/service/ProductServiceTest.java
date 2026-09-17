@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 import com.example.productservice.client.MediaOwnershipClient;
 import com.example.productservice.dto.CreateProductRequest;
@@ -44,12 +45,42 @@ class ProductServiceTest {
     private ProductEventProducer eventProducer;
     @Mock
     private MediaOwnershipClient mediaOwnershipClient;
+    @Mock
+    private MongoTemplate mongoTemplate;
 
     private ProductService productService;
 
     @BeforeEach
     void setUp() {
         productService = new ProductService(productRepository, eventProducer, mediaOwnershipClient);
+        productService.setMongoTemplate(mongoTemplate);
+    }
+
+    @Test
+    void searchesProductsWithValidatedFilters() {
+        Product match = product("product-1", SELLER_ID, "Olive oil");
+        when(mongoTemplate.find(org.mockito.ArgumentMatchers.any(org.springframework.data.mongodb.core.query.Query.class),
+                org.mockito.ArgumentMatchers.eq(Product.class))).thenReturn(List.of(match));
+
+        List<ProductResponse> responses = productService.searchProducts(
+                "olive", new BigDecimal("5"), new BigDecimal("20"), SELLER_ID, true,
+                "price_asc", 0, 12);
+
+        assertThat(responses).extracting(ProductResponse::id).containsExactly("product-1");
+        verify(mongoTemplate).find(org.mockito.ArgumentMatchers.any(org.springframework.data.mongodb.core.query.Query.class),
+                org.mockito.ArgumentMatchers.eq(Product.class));
+    }
+
+    @Test
+    void rejectsInvalidSearchFilters() {
+        assertThatThrownBy(() -> productService.searchProducts(
+                null, new BigDecimal("20"), new BigDecimal("10"), null, null, "newest", 0, 24))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Minimum price");
+        assertThatThrownBy(() -> productService.searchProducts(
+                null, null, null, null, null, "unknown", 0, 24))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Unsupported");
     }
 
     @Test

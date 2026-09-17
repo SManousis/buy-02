@@ -12,6 +12,8 @@ import { LoadablePageBase } from './loadable-page-base';
 export abstract class OrderListPageBase extends LoadablePageBase<Order[]> {
   orders: Order[] = [];
   selectedStatus: OrderStatus | '' = '';
+  searchText = '';
+  private searchTimer?: ReturnType<typeof setTimeout>;
 
   protected constructor(
     protected readonly orderService: OrderService,
@@ -24,6 +26,12 @@ export abstract class OrderListPageBase extends LoadablePageBase<Order[]> {
   onStatusChange(status: string): void {
     this.selectedStatus = status as OrderStatus | '';
     this.load();
+  }
+
+  onSearchChange(value: string): void {
+    this.searchText = value;
+    clearTimeout(this.searchTimer);
+    this.searchTimer = setTimeout(() => this.load(), 300);
   }
 
   itemCount(order: Order): number {

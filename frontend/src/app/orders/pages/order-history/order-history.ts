@@ -20,6 +20,6 @@ export class OrderHistory extends OrderListPageBase {
   }
 
   protected override fetch(): Observable<Order[]> {
-    return this.orderService.mine(this.selectedStatus || undefined);
+    return this.orderService.mine(this.selectedStatus || undefined, this.searchText);
   }
 }

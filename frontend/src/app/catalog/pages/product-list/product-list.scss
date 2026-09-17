@@ -12,11 +12,38 @@
 
 h1 { font-size: 32px; margin: 0; }
 
+.filters {
+	align-items: end;
+	background: var(--color-surface, #fff);
+	border: 1px solid var(--color-border, #ddd);
+	border-radius: 12px;
+	display: grid;
+	gap: 16px;
+	grid-template-columns: minmax(220px, 2fr) repeat(4, minmax(130px, 1fr)) auto auto;
+	margin-bottom: 28px;
+	padding: 18px;
+
+	label:not(.check-field) { display: flex; flex-direction: column; gap: 6px; }
+	span { color: var(--color-muted); font-size: 13px; font-weight: 600; }
+	input, select { border: 1px solid var(--color-border, #ccc); border-radius: 8px; min-height: 40px; padding: 8px 10px; }
+}
+
+.check-field { align-items: center; display: flex; gap: 8px; min-height: 40px; }
+
+@media (max-width: 1100px) { .filters { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 700px) {
+	.filters { grid-template-columns: 1fr 1fr; }
+	.search-field { grid-column: 1 / -1; }
+}
+@media (max-width: 440px) { .filters { grid-template-columns: 1fr; } .search-field { grid-column: auto; } }
+
 .product-grid {
 	display: grid;
 	gap: 24px;
 	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
 }
+
+.pagination { align-items: center; display: flex; gap: 16px; justify-content: center; margin-top: 32px; }
 
 .state-message {
 	align-items: center;

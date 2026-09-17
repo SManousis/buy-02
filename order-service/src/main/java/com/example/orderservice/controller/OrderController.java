@@ -53,15 +53,17 @@ public class OrderController {
 
     @GetMapping("/mine")
     public List<OrderResponse> mine(@AuthenticationPrincipal Jwt jwt,
-                                     @RequestParam(required = false) OrderStatus status) {
-        return queryService.listMine(jwt.getSubject(), status).stream().map(OrderResponse::from).toList();
+                                     @RequestParam(required = false) OrderStatus status,
+                                     @RequestParam(required = false) String q) {
+        return queryService.listMine(jwt.getSubject(), status, q).stream().map(OrderResponse::from).toList();
     }
 
     @GetMapping("/selling")
     public List<OrderResponse> selling(@AuthenticationPrincipal Jwt jwt,
-                                        @RequestParam(required = false) OrderStatus status) {
+                                        @RequestParam(required = false) OrderStatus status,
+                                        @RequestParam(required = false) String q) {
         ensureSeller(jwt);
-        return queryService.listSelling(jwt.getSubject(), status).stream().map(OrderResponse::from).toList();
+        return queryService.listSelling(jwt.getSubject(), status, q).stream().map(OrderResponse::from).toList();
     }
 
     /** Statistics are always scoped to the JWT subject; there is no way to request another user's figures. */

@@ -8,6 +8,8 @@ import static org.mockito.Mockito.when;
 import com.example.orderservice.exception.NotFoundException;
 import com.example.orderservice.model.Order;
 import com.example.orderservice.model.OrderStatus;
+import com.example.orderservice.model.OrderItem;
+import java.math.BigDecimal;
 import com.example.orderservice.repository.OrderRepository;
 import java.util.List;
 import java.util.Optional;
@@ -47,6 +49,18 @@ class OrderQueryServiceTest {
         when(repository.findBySellerIdAndStatusOrderByCreatedAtDesc("seller", OrderStatus.SHIPPED))
                 .thenReturn(List.of(order));
         assertThat(service.listSelling("seller", OrderStatus.SHIPPED)).containsExactly(order);
+    }
+
+    @Test void keywordSearchMatchesSnapshottedProductNames() {
+        Order matching = new Order();
+        matching.setBuyerId("buyer-one");
+        matching.setItems(List.of(new OrderItem("p1", "Organic honey", BigDecimal.TEN, 1, null)));
+        Order other = new Order();
+        other.setBuyerId("buyer-two");
+        other.setItems(List.of(new OrderItem("p2", "Olive oil", BigDecimal.TEN, 1, null)));
+        when(repository.findBySellerIdOrderByCreatedAtDesc("seller")).thenReturn(List.of(matching, other));
+
+        assertThat(service.listSelling("seller", null, "HONEY")).containsExactly(matching);
     }
 
     @Test void getForUserReturnsOrderWhenCallerIsBuyer() {
