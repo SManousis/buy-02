@@ -34,6 +34,9 @@
         </div>
         <p>JPEG, PNG, or WEBP; up to 2 MB.</p>
       </section>
+
+      <app-seller-stats *ngIf="isSeller"></app-seller-stats>
+      <app-buyer-stats *ngIf="!isSeller"></app-buyer-stats>
     </ng-container>
   </section>
 </main>

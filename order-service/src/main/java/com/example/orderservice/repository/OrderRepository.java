@@ -11,6 +11,8 @@ public interface OrderRepository extends MongoRepository<Order, String> {
     List<Order> findBySellerIdOrderByCreatedAtDesc(String sellerId);
     List<Order> findByBuyerIdAndStatusOrderByCreatedAtDesc(String buyerId, OrderStatus status);
     List<Order> findBySellerIdAndStatusOrderByCreatedAtDesc(String sellerId, OrderStatus status);
+    List<Order> findByBuyerIdAndStatusNotOrderByCreatedAtDesc(String buyerId, OrderStatus status);
+    List<Order> findBySellerIdAndStatusNotOrderByCreatedAtDesc(String sellerId, OrderStatus status);
     Optional<Order> findByIdAndBuyerId(String id, String buyerId);
     Optional<Order> findByIdAndSellerId(String id, String sellerId);
 }

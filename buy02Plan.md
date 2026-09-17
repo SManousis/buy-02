@@ -51,9 +51,11 @@ This is the shared source of truth for current progress. Update the relevant che
 
 ### Phase 5 - Profile analytics
 
-- [ ] Add buyer top products, most-bought products, and total spent.
-- [ ] Add seller best-selling products and total revenue.
-- [ ] Add buyer and seller Angular analytics panels.
+- [x] Add buyer top products, most-bought products, and total spent (`GET /orders/stats/me`).
+- [x] Add seller best-selling products and total revenue (`GET /orders/stats/selling`).
+- [x] Add buyer and seller Angular analytics panels on the profile page.
+
+Design note: §3.4 suggested a Mongo aggregation pipeline. The statistics are instead grouped in Java (`OrderStatsService`) over the indexed per-user queries `findByBuyerIdAndStatusNotOrderByCreatedAtDesc` / `findBySellerIdAndStatusNotOrderByCreatedAtDesc`. `order-service` tests are Mockito unit tests without a database, so this keeps the grouping, ranking, and exact `BigDecimal` totals fully unit-tested; one user's order history is small enough that loading it is not a performance concern. See `PHASE5_WORKFLOW.md` §7 for the verification record.
 
 ### Phase 6 - Completion and audit
 

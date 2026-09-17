@@ -66,6 +66,28 @@ export interface ReorderResponse {
   unavailableItems: UnavailableItem[];
 }
 
+/** One product's totals across a user's non-cancelled orders, named from the latest order snapshot. */
+export interface ProductStat {
+  productId: string;
+  name: string;
+  imageId: string | null;
+  quantity: number;
+  amount: number;
+}
+
+export interface BuyerStats {
+  topProducts: ProductStat[];
+  mostBoughtProducts: ProductStat[];
+  totalSpent: number;
+  orderCount: number;
+}
+
+export interface SellerStats {
+  bestSellingProducts: ProductStat[];
+  totalRevenue: number;
+  orderCount: number;
+}
+
 /**
  * Mirrors the backend's forward-only, one-step-at-a-time transition chain
  * (see OrderStatusService#NEXT_STATUS). Used to drive seller status controls;
@@ -113,6 +135,14 @@ export class OrderService {
 
   reorder(id: string): Observable<ReorderResponse> {
     return this.http.post<ReorderResponse>(`${this.base}/${id}/reorder`, {});
+  }
+
+  statsMine(): Observable<BuyerStats> {
+    return this.http.get<BuyerStats>(`${this.base}/stats/me`);
+  }
+
+  statsSelling(): Observable<SellerStats> {
+    return this.http.get<SellerStats>(`${this.base}/stats/selling`);
   }
 
   private statusParams(status?: OrderStatus): HttpParams {

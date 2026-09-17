@@ -9,13 +9,18 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { ProfileRoutingModule } from './profile-routing-module';
 import { Profile } from './pages/profile/profile';
+import { BuyerStatsPanel } from './components/buyer-stats/buyer-stats';
+import { SellerStatsPanel } from './components/seller-stats/seller-stats';
+import { ProductStatList } from './components/product-stat-list/product-stat-list';
+import { SharedModule } from '../shared/shared-module';
 
 @NgModule({
-  declarations: [Profile],
+  declarations: [Profile, BuyerStatsPanel, SellerStatsPanel, ProductStatList],
   imports: [
     CommonModule,
     ReactiveFormsModule,
     ProfileRoutingModule,
+    SharedModule,
     MatButtonModule,
     MatFormFieldModule,
     MatIconModule,
