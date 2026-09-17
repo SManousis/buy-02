@@ -1,9 +1,10 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Subject, takeUntil, timeout } from 'rxjs';
+import { Observable, takeUntil } from 'rxjs';
 import { Cart, CartItem, CartService } from '../../../shared/services/cart';
 import { serverMessage } from '../../../shared/services/http-error';
+import { LoadablePageBase } from '../../../shared/components/loadable-page-base';
 
 @Component({
   selector: 'app-cart-page',
@@ -11,46 +12,16 @@ import { serverMessage } from '../../../shared/services/http-error';
   templateUrl: './cart-page.html',
   styleUrl: './cart-page.scss',
 })
-export class CartPage implements OnInit, OnDestroy {
+export class CartPage extends LoadablePageBase<Cart> {
   cart: Cart | null = null;
-  loading = true;
-  loadError = false;
   updatingProductId: string | null = null;
 
-  private destroy$ = new Subject<void>();
-
   constructor(
-    private cartService: CartService,
-    private snack: MatSnackBar,
-    private changeDetector: ChangeDetectorRef,
-  ) {}
-
-  ngOnInit(): void {
-    this.load();
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  load(): void {
-    this.loading = true;
-    this.loadError = false;
-    this.cartService.get()
-      .pipe(timeout(10_000), takeUntil(this.destroy$))
-      .subscribe({
-        next: (cart) => {
-          this.cart = cart;
-          this.loading = false;
-          this.changeDetector.detectChanges();
-        },
-        error: () => {
-          this.loadError = true;
-          this.loading = false;
-          this.changeDetector.detectChanges();
-        },
-      });
+    private readonly cartService: CartService,
+    private readonly snack: MatSnackBar,
+    changeDetector: ChangeDetectorRef,
+  ) {
+    super(changeDetector);
   }
 
   get subtotal(): number {
@@ -101,6 +72,14 @@ export class CartPage implements OnInit, OnDestroy {
 
   trackByProductId(_index: number, item: CartItem): string {
     return item.productId;
+  }
+
+  protected override fetch(): Observable<Cart> {
+    return this.cartService.get();
+  }
+
+  protected override onLoaded(cart: Cart): void {
+    this.cart = cart;
   }
 
   private changeQuantity(productId: string, quantity: number): void {

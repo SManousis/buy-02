@@ -153,10 +153,10 @@ export class Profile implements OnInit, OnDestroy {
 
   private showError(error: unknown, fallback: string): void {
     const status = error instanceof HttpErrorResponse ? error.status : 0;
-    const message = status === 409 ? 'That username is already in use.'
-      : status === 403 ? 'You are not allowed to perform that action.'
-      : status === 0 ? 'Cannot reach the server. Check your connection.'
-      : fallback;
+    let message = fallback;
+    if (status === 409) message = 'That username is already in use.';
+    else if (status === 403) message = 'You are not allowed to perform that action.';
+    else if (status === 0) message = 'Cannot reach the server. Check your connection.';
     this.snack.open(message, 'Close', { duration: 4000, panelClass: 'snack-error' });
   }
 

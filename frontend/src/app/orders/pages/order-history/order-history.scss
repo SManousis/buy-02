@@ -16,42 +16,6 @@
   gap: 10px;
 }
 
-.filter-label {
-  font-size: 13px;
-  color: var(--color-muted);
-  font-weight: 500;
-}
-
-.filter-select {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 8px 12px;
-  font-size: 14px;
-  background: var(--color-surface);
-  color: var(--color-text);
-  cursor: pointer;
-}
-
-.state-center {
-  display: flex;
-  justify-content: center;
-  padding: 80px 0;
-}
-
-.empty-dash {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 80px 0;
-  text-align: center;
-  color: var(--color-muted);
-
-  mat-icon { font-size: 56px; width: 56px; height: 56px; }
-  h2 { font-size: 22px; font-weight: 700; margin: 0; color: var(--color-text); }
-  p  { margin: 0 0 8px; }
-}
-
 .order-rows {
   display: flex;
   flex-direction: column;
@@ -110,12 +74,6 @@
   border-radius: 999px;
   white-space: nowrap;
 }
-
-.status-pending   { background: #fdf2e0; color: #a9701c; }
-.status-confirmed { background: #e3f0fc; color: #1b6ca8; }
-.status-shipped   { background: #eae5fb; color: #5b3ea6; }
-.status-delivered { background: #e6f4ea; color: #2d6a4f; }
-.status-cancelled { background: #fbe7e4; color: #c0392b; }
 
 @media (max-width: 640px) {
   .row-count { display: none; }

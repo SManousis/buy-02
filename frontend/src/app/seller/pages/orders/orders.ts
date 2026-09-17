@@ -1,18 +1,10 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Subject, takeUntil, timeout } from 'rxjs';
+import { Observable, takeUntil } from 'rxjs';
 import { Order, OrderStatus, OrderService, nextOrderStatus } from '../../../shared/services/order';
 import { serverMessage } from '../../../shared/services/http-error';
-
-const STATUS_FILTERS: { value: OrderStatus | ''; label: string }[] = [
-  { value: '', label: 'All orders' },
-  { value: 'PENDING', label: 'Pending' },
-  { value: 'CONFIRMED', label: 'Confirmed' },
-  { value: 'SHIPPED', label: 'Shipped' },
-  { value: 'DELIVERED', label: 'Delivered' },
-  { value: 'CANCELLED', label: 'Cancelled' },
-];
+import { OrderListPageBase } from '../../../shared/components/order-list-page-base';
 
 @Component({
   selector: 'app-seller-orders',
@@ -20,55 +12,16 @@ const STATUS_FILTERS: { value: OrderStatus | ''; label: string }[] = [
   templateUrl: './orders.html',
   styleUrl: './orders.scss',
 })
-export class SellerOrders implements OnInit, OnDestroy {
-  orders: Order[] = [];
-  loading = true;
-  loadError = false;
-  statusFilters = STATUS_FILTERS;
-  selectedStatus: OrderStatus | '' = '';
+export class SellerOrders extends OrderListPageBase {
   searchText = '';
   updatingId: string | null = null;
 
-  private destroy$ = new Subject<void>();
-
   constructor(
-    private orderService: OrderService,
-    private snack: MatSnackBar,
-    private changeDetector: ChangeDetectorRef,
-  ) {}
-
-  ngOnInit(): void {
-    this.load();
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  load(): void {
-    this.loading = true;
-    this.loadError = false;
-    this.orderService.selling(this.selectedStatus || undefined)
-      .pipe(timeout(10_000), takeUntil(this.destroy$))
-      .subscribe({
-        next: (orders) => {
-          this.orders = orders;
-          this.loading = false;
-          this.changeDetector.detectChanges();
-        },
-        error: () => {
-          this.loadError = true;
-          this.loading = false;
-          this.changeDetector.detectChanges();
-          this.snack.open('Orders could not be loaded. Try again.', 'Close', { duration: 4000, panelClass: 'snack-error' });
-        },
-      });
-  }
-
-  onStatusChange(status: string): void {
-    this.selectedStatus = status as OrderStatus | '';
-    this.load();
+    orderService: OrderService,
+    snack: MatSnackBar,
+    changeDetector: ChangeDetectorRef,
+  ) {
+    super(orderService, snack, changeDetector);
   }
 
   get filteredOrders(): Order[] {
@@ -79,14 +32,6 @@ export class SellerOrders implements OnInit, OnDestroy {
       order.buyerId.toLowerCase().includes(term) ||
       order.items.some(item => item.name.toLowerCase().includes(term)),
     );
-  }
-
-  itemCount(order: Order): number {
-    return order.items.reduce((sum, item) => sum + item.quantity, 0);
-  }
-
-  statusClass(status: OrderStatus): string {
-    return 'status-' + status.toLowerCase();
   }
 
   nextStatus(order: Order): OrderStatus | null {
@@ -114,6 +59,10 @@ export class SellerOrders implements OnInit, OnDestroy {
           this.load();
         },
       });
+  }
+
+  protected override fetch(): Observable<Order[]> {
+    return this.orderService.selling(this.selectedStatus || undefined);
   }
 
   private statusErrorMessage(error: unknown): string {

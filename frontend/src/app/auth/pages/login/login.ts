@@ -58,11 +58,9 @@ export class Login implements OnDestroy {
         },
         error: (err) => {
           this.loading = false;
-          const msg = err.status === 401
-            ? 'Invalid email or password.'
-            : err.status === 0
-              ? 'Cannot reach server. Check your connection.'
-              : 'Login failed. Try again.';
+          let msg = 'Login failed. Try again.';
+          if (err.status === 401) msg = 'Invalid email or password.';
+          else if (err.status === 0) msg = 'Cannot reach server. Check your connection.';
           this.snack.open(msg, 'Close', { duration: 4000, panelClass: 'snack-error' });
         },
       });

@@ -3,7 +3,7 @@ import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators }
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ProductService, Product } from '../../../shared/services/product';
+import { ProductService } from '../../../shared/services/product';
 import { Subject, takeUntil, timeout } from 'rxjs';
 
 function notBlank(control: AbstractControl): ValidationErrors | null {

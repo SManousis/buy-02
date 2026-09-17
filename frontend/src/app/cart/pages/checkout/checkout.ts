@@ -1,12 +1,13 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Subject, takeUntil, timeout } from 'rxjs';
+import { Observable, takeUntil } from 'rxjs';
 import { Cart, CartService } from '../../../shared/services/cart';
 import { CheckoutResponse, OrderService } from '../../../shared/services/order';
 import { serverMessage } from '../../../shared/services/http-error';
+import { LoadablePageBase } from '../../../shared/components/loadable-page-base';
 
 @Component({
   selector: 'app-checkout',
@@ -14,23 +15,20 @@ import { serverMessage } from '../../../shared/services/http-error';
   templateUrl: './checkout.html',
   styleUrl: './checkout.scss',
 })
-export class Checkout implements OnInit, OnDestroy {
+export class Checkout extends LoadablePageBase<Cart> {
   form: FormGroup;
   cart: Cart | null = null;
-  loading = true;
-  loadError = false;
   submitting = false;
 
-  private destroy$ = new Subject<void>();
-
   constructor(
-    private fb: FormBuilder,
-    private cartService: CartService,
-    private orderService: OrderService,
-    private router: Router,
-    private snack: MatSnackBar,
-    private changeDetector: ChangeDetectorRef,
+    private readonly fb: FormBuilder,
+    private readonly cartService: CartService,
+    private readonly orderService: OrderService,
+    private readonly router: Router,
+    private readonly snack: MatSnackBar,
+    changeDetector: ChangeDetectorRef,
   ) {
+    super(changeDetector);
     this.form = this.fb.group({
       line1: ['', [Validators.required, Validators.maxLength(120)]],
       city: ['', [Validators.required, Validators.maxLength(80)]],
@@ -38,34 +36,6 @@ export class Checkout implements OnInit, OnDestroy {
       country: ['', [Validators.required, Validators.maxLength(80)]],
       paymentMethod: ['CASH_ON_DELIVERY', [Validators.required]],
     });
-  }
-
-  ngOnInit(): void {
-    this.load();
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  load(): void {
-    this.loading = true;
-    this.loadError = false;
-    this.cartService.get()
-      .pipe(timeout(10_000), takeUntil(this.destroy$))
-      .subscribe({
-        next: (cart) => {
-          this.cart = cart;
-          this.loading = false;
-          this.changeDetector.detectChanges();
-        },
-        error: () => {
-          this.loadError = true;
-          this.loading = false;
-          this.changeDetector.detectChanges();
-        },
-      });
   }
 
   get subtotal(): number {
@@ -86,6 +56,14 @@ export class Checkout implements OnInit, OnDestroy {
       next: (response) => this.onCheckoutSuccess(response),
       error: (error) => this.onCheckoutError(error),
     });
+  }
+
+  protected override fetch(): Observable<Cart> {
+    return this.cartService.get();
+  }
+
+  protected override onLoaded(cart: Cart): void {
+    this.cart = cart;
   }
 
   private onCheckoutSuccess(response: CheckoutResponse): void {

@@ -1,0 +1,5 @@
+<label class="filter-label" for="status-filter">Status</label>
+<select id="status-filter" class="filter-select" [value]="value"
+  (change)="valueChange.emit($any($event.target).value)">
+  <option *ngFor="let f of statusFilters" [value]="f.value">{{ f.label }}</option>
+</select>

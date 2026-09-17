@@ -131,4 +131,50 @@ describe('SellerOrders', () => {
 
     expect(snackMessages).toEqual(['Cannot transition order from DELIVERED to CONFIRMED']);
   });
+
+  it.each([
+    [404, 'This order no longer exists or is not yours.'],
+    [403, 'You do not have permission to update this order.'],
+    [409, 'This order was just updated elsewhere. Refreshing…'],
+    [0, 'Cannot reach the server. Check your connection.'],
+    [500, 'Could not update this order. Try again.'],
+  ])('shows the right message for a %i status update response', (status, message) => {
+    updateStatus = () => throwError(() => new HttpErrorResponse({ status }));
+    fixture.detectChanges();
+
+    component.advance(makeOrder('order-1', 'PENDING'));
+
+    expect(snackMessages).toEqual([message]);
+    expect(component.updatingId).toBeNull();
+  });
+
+  it('does not advance a terminal order or one while another update is running', () => {
+    let calls = 0;
+    updateStatus = (id, status) => { calls++; return of(makeOrder(id, status)); };
+    fixture.detectChanges();
+
+    component.advance(makeOrder('order-1', 'DELIVERED'));
+    component.updatingId = 'order-2';
+    component.advance(makeOrder('order-1', 'PENDING'));
+
+    expect(calls).toBe(0);
+  });
+
+  it('snackbars and shows the error state when orders fail to load', () => {
+    selling = () => throwError(() => new Error('offline'));
+    fixture.detectChanges();
+
+    expect(snackMessages).toEqual(['Orders could not be loaded. Try again.']);
+  });
+
+  it('shows a no-match state when the search filters out every order', () => {
+    fixture.detectChanges();
+
+    const search = fixture.nativeElement.querySelector('.search-input') as HTMLInputElement;
+    search.value = 'nothing-matches';
+    search.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('No orders match your search');
+  });
 });

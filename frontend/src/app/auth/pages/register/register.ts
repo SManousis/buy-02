@@ -75,11 +75,9 @@ export class Register implements OnDestroy {
         },
         error: (err) => {
           this.loading = false;
-          const msg = err.status === 409
-            ? 'Username or email already taken.'
-            : err.status === 0
-              ? 'Cannot reach server. Check your connection.'
-              : 'Registration failed. Try again.';
+          let msg = 'Registration failed. Try again.';
+          if (err.status === 409) msg = 'Username or email already taken.';
+          else if (err.status === 0) msg = 'Cannot reach server. Check your connection.';
           this.snack.open(msg, 'Close', { duration: 4000, panelClass: 'snack-error' });
         },
       });

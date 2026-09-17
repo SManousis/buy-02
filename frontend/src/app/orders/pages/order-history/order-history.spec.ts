@@ -88,4 +88,15 @@ describe('OrderHistory', () => {
 
     expect(receivedStatus).toBe('CONFIRMED');
   });
+
+  it('reloads when a status is picked from the filter dropdown', () => {
+    fixture.detectChanges();
+
+    const select = fixture.nativeElement.querySelector('#status-filter') as HTMLSelectElement;
+    select.value = 'SHIPPED';
+    select.dispatchEvent(new Event('change'));
+
+    expect(receivedStatus).toBe('SHIPPED');
+    expect(component.selectedStatus).toBe('SHIPPED');
+  });
 });

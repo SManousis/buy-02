@@ -96,6 +96,45 @@ describe('Checkout', () => {
     expect(loads).toBe(2);
   });
 
+  function submitValidForm(): void {
+    component.form.setValue({
+      line1: '1 Main St', city: 'Athens', postalCode: '10001', country: 'Greece', paymentMethod: 'CASH_ON_DELIVERY',
+    });
+    component.submit();
+  }
+
+  it('reports how many orders were placed when checkout splits by seller', () => {
+    checkout = () => of({ checkoutGroupId: 'g', orders: [{}, {}] } as unknown as CheckoutResponse);
+    fixture.detectChanges();
+
+    submitValidForm();
+
+    expect(snackMessages).toEqual(['2 orders placed successfully!']);
+  });
+
+  it.each([
+    [400, 'Your cart is empty. Add items before checking out.'],
+    [503, 'Product service is temporarily unavailable. Try again shortly.'],
+    [0, 'Cannot reach the server. Check your connection.'],
+    [500, 'Could not place your order. Try again.'],
+  ])('shows the right message for a %i checkout response', (status, message) => {
+    checkout = () => throwError(() => new HttpErrorResponse({ status }));
+    fixture.detectChanges();
+
+    submitValidForm();
+
+    expect(snackMessages).toEqual([message]);
+    expect(component.submitting).toBe(false);
+  });
+
+  it('shows an error state when the cart cannot be loaded', () => {
+    get = () => throwError(() => new Error('offline'));
+    fixture.detectChanges();
+
+    expect(component.loadError).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('Your cart could not be loaded');
+  });
+
   it('shows an empty-cart state when the cart has no items', () => {
     get = () => of({ ...CART_WITH_ITEMS, items: [], subtotal: 0 });
     fixture.detectChanges();

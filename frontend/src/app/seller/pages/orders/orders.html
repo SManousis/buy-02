@@ -7,24 +7,12 @@
     <div class="dash-actions">
       <input type="search" class="search-input" placeholder="Search by order, buyer, or product"
         [value]="searchText" (input)="searchText = $any($event.target).value">
-      <label class="filter-label" for="status-filter">Status</label>
-      <select id="status-filter" class="filter-select" [value]="selectedStatus"
-        (change)="onStatusChange($any($event.target).value)">
-        <option *ngFor="let f of statusFilters" [value]="f.value">{{ f.label }}</option>
-      </select>
+      <app-order-status-filter [value]="selectedStatus" (valueChange)="onStatusChange($event)"></app-order-status-filter>
     </div>
   </div>
 
-  <div *ngIf="loading" class="state-center" aria-live="polite">
-    <mat-spinner diameter="48"></mat-spinner>
-  </div>
-
-  <div *ngIf="!loading && loadError" class="empty-dash">
-    <mat-icon>error_outline</mat-icon>
-    <h2>Orders could not be loaded</h2>
-    <p>Check your connection and try again.</p>
-    <button type="button" class="btn-primary" (click)="load()">Try again</button>
-  </div>
+  <app-load-state [loading]="loading" [error]="loadError" errorTitle="Orders could not be loaded"
+    (retry)="load()"></app-load-state>
 
   <div *ngIf="!loading && !loadError && orders.length === 0" class="empty-dash">
     <mat-icon>receipt_long</mat-icon>

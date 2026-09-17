@@ -14,6 +14,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { CartRoutingModule } from './cart-routing-module';
 import { CartPage } from './pages/cart-page/cart-page';
 import { Checkout } from './pages/checkout/checkout';
+import { SharedModule } from '../shared/shared-module';
 
 @NgModule({
   declarations: [CartPage, Checkout],
@@ -22,6 +23,7 @@ import { Checkout } from './pages/checkout/checkout';
     RouterModule,
     ReactiveFormsModule,
     CartRoutingModule,
+    SharedModule,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,

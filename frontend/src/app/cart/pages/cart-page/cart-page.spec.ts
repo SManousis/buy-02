@@ -23,12 +23,14 @@ describe('CartPage', () => {
   let get: () => Observable<Cart>;
   let updateItem: (productId: string, quantity: number) => Observable<Cart>;
   let removeItem: (productId: string) => Observable<Cart>;
+  let clear: () => Observable<void>;
   let snackMessages: string[];
 
   beforeEach(async () => {
     get = () => of(CART_WITH_ITEMS);
     updateItem = () => of(CART_WITH_ITEMS);
     removeItem = () => of({ ...CART_WITH_ITEMS, items: [], subtotal: 0 });
+    clear = () => of(undefined);
     snackMessages = [];
 
     await TestBed.configureTestingModule({
@@ -41,6 +43,7 @@ describe('CartPage', () => {
             get: () => get(),
             updateItem: (id: string, qty: number) => updateItem(id, qty),
             removeItem: (id: string) => removeItem(id),
+            clear: () => clear(),
           },
         },
         { provide: MatSnackBar, useValue: { open: (message: string) => snackMessages.push(message) } },
@@ -120,5 +123,85 @@ describe('CartPage', () => {
 
     expect(snackMessages).toEqual(['Insufficient stock for product: Olive oil']);
     expect(loads).toBe(2);
+  });
+
+  it('decrements an item quantity above one', () => {
+    let received: { id: string; qty: number } | null = null;
+    updateItem = (id, qty) => { received = { id, qty }; return of({ ...CART_WITH_ITEMS }); };
+    fixture.detectChanges();
+
+    component.decrement('p1', 3);
+
+    expect(received).toEqual({ id: 'p1', qty: 2 });
+  });
+
+  it('ignores a quantity change while another update is in progress', () => {
+    let calls = 0;
+    updateItem = () => { calls++; return new Subject<Cart>(); };
+    fixture.detectChanges();
+
+    component.increment('p1', 2);
+    component.increment('p1', 2);
+
+    expect(calls).toBe(1);
+  });
+
+  it('confirms when an item is removed', () => {
+    fixture.detectChanges();
+
+    component.remove('p1');
+
+    expect(component.cart?.items).toEqual([]);
+    expect(snackMessages).toEqual(['Item removed from cart.']);
+  });
+
+  it('clears the cart and reloads it', () => {
+    let loads = 0;
+    get = () => { loads++; return of(CART_WITH_ITEMS); };
+    fixture.detectChanges();
+
+    component.clear();
+
+    expect(loads).toBe(2);
+    expect(component.updatingProductId).toBeNull();
+    expect(snackMessages).toEqual(['Cart cleared.']);
+  });
+
+  it('does not clear the cart while an update is in progress', () => {
+    let cleared = false;
+    clear = () => { cleared = true; return of(undefined); };
+    fixture.detectChanges();
+    component.updatingProductId = 'p1';
+
+    component.clear();
+
+    expect(cleared).toBe(false);
+  });
+
+  it('explains a missing item on a 404 response', () => {
+    removeItem = () => throwError(() => new HttpErrorResponse({ status: 404 }));
+    fixture.detectChanges();
+
+    component.remove('p1');
+
+    expect(snackMessages).toEqual(['That item is no longer in your cart. Refreshing…']);
+  });
+
+  it('explains a connection problem when the server cannot be reached', () => {
+    clear = () => throwError(() => new HttpErrorResponse({ status: 0 }));
+    fixture.detectChanges();
+
+    component.clear();
+
+    expect(snackMessages).toEqual(['Cannot reach the server. Check your connection.']);
+  });
+
+  it('falls back to a generic message for other errors', () => {
+    updateItem = () => throwError(() => new HttpErrorResponse({ status: 500 }));
+    fixture.detectChanges();
+
+    component.increment('p1', 2);
+
+    expect(snackMessages).toEqual(['Could not update your cart. Try again.']);
   });
 });

@@ -1,5 +1,5 @@
-import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { Injectable, inject } from '@angular/core';
+import { ActivatedRouteSnapshot, CanActivate, CanActivateFn, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { AuthService } from '../services/auth';
 
 export const authGuard: CanActivateFn = () => {
@@ -10,9 +10,6 @@ export const authGuard: CanActivateFn = () => {
 };
 
 // Class wrapper expected by AppRoutingModule
-import { Injectable } from '@angular/core';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree } from '@angular/router';
-
 @Injectable({ providedIn: 'root' })
 export class AuthGuard implements CanActivate {
   constructor(private auth: AuthService, private router: Router) {}
