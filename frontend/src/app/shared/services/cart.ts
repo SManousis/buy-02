@@ -1,5 +1,5 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -13,7 +13,7 @@ export interface CartItem {
 }
 
 export interface Cart {
-  id: string | null;
+  id: string;
   items: CartItem[];
   subtotal: number;
   updatedAt: string;
@@ -21,37 +21,47 @@ export interface Cart {
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
-  private readonly base = `${environment.apiBaseUrl}/cart`;
-  private readonly countSubject = new BehaviorSubject(0);
-  readonly itemCount$ = this.countSubject.asObservable();
+  private base = `${environment.apiBaseUrl}/cart`;
 
-  constructor(private readonly http: HttpClient) {}
+  private itemCountSubject = new BehaviorSubject<number>(0);
+  readonly itemCount$ = this.itemCountSubject.asObservable();
+
+  constructor(private http: HttpClient) {}
 
   get(): Observable<Cart> {
-    return this.sync(this.http.get<Cart>(this.base));
+    return this.http.get<Cart>(this.base).pipe(tap((cart) => this.updateCount(cart)));
   }
 
-  add(productId: string, quantity = 1): Observable<Cart> {
-    return this.sync(this.http.post<Cart>(`${this.base}/items`, { productId, quantity }));
+  addItem(productId: string, quantity: number): Observable<Cart> {
+    return this.http.post<Cart>(`${this.base}/items`, { productId, quantity })
+      .pipe(tap((cart) => this.updateCount(cart)));
   }
 
-  update(productId: string, quantity: number): Observable<Cart> {
-    return this.sync(this.http.put<Cart>(`${this.base}/items/${encodeURIComponent(productId)}`, { quantity }));
+  updateItem(productId: string, quantity: number): Observable<Cart> {
+    return this.http.put<Cart>(`${this.base}/items/${productId}`, { quantity })
+      .pipe(tap((cart) => this.updateCount(cart)));
   }
 
-  remove(productId: string): Observable<Cart> {
-    return this.sync(this.http.delete<Cart>(`${this.base}/items/${encodeURIComponent(productId)}`));
+  removeItem(productId: string): Observable<Cart> {
+    return this.http.delete<Cart>(`${this.base}/items/${productId}`)
+      .pipe(tap((cart) => this.updateCount(cart)));
   }
 
   clear(): Observable<void> {
-    return this.http.delete<void>(this.base).pipe(tap(() => this.countSubject.next(0)));
+    return this.http.delete<void>(this.base).pipe(tap(() => this.itemCountSubject.next(0)));
   }
 
-  resetCount(): void { this.countSubject.next(0); }
+  /** Refreshes the badge count, e.g. after login. Silently ignores failures. */
+  refresh(): void {
+    this.get().subscribe({ error: () => {} });
+  }
 
-  private sync(request: Observable<Cart>): Observable<Cart> {
-    return request.pipe(tap(cart => this.countSubject.next(
-      cart.items.reduce((total, item) => total + item.quantity, 0)
-    )));
+  /** Resets the badge count, e.g. after logout. */
+  reset(): void {
+    this.itemCountSubject.next(0);
+  }
+
+  private updateCount(cart: Cart): void {
+    this.itemCountSubject.next(cart.items.reduce((sum, item) => sum + item.quantity, 0));
   }
 }

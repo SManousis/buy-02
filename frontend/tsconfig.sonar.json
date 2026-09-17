@@ -1,0 +1,37 @@
+/* Analysis-only TypeScript configuration for the SonarQube scanner.
+   The scanner bundles its own TypeScript, older than the project's, which
+   rejects "module": "preserve" (TypeScript 5.4+) and "moduleResolution":
+   "bundler" (TypeScript 5.0+) with "Argument for '--module' option must be: ...".
+
+   This file deliberately does NOT extend ./tsconfig.json: the scanner's
+   TypeScript parses the whole extends chain and fails on the base file's
+   "preserve" value even when a child overrides it. It therefore repeats the
+   settings that matter for analysis instead of inheriting them. The real build
+   keeps using tsconfig.json untouched. */
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "lib": [
+      "ES2022",
+      "dom"
+    ],
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "types": [
+      "node",
+      "vitest/globals"
+    ]
+  },
+  "include": [
+    "src/**/*.ts"
+  ]
+}

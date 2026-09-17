@@ -6,9 +6,10 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "echo 'No automated frontend test suite is configured for this exercise.'",
+    "test": "ng test",
     "lint": "echo 'Frontend lint is intentionally disabled for this exercise.'",
-    "serve:ssr:frontend": "node dist/frontend/server/server.mjs"
+    "serve:ssr:frontend": "node dist/frontend/server/server.mjs",
+    "test:coverage": "ng test --watch=false --coverage --coverage-reporters=lcovonly"
   },
   "private": true,
   "packageManager": "npm@10.9.2",
@@ -37,6 +38,7 @@
     "@angular/compiler-cli": "^21.2.0",
     "@types/express": "^5.0.1",
     "@types/node": "^20.17.19",
+    "@vitest/coverage-v8": "^4.1.10",
     "jsdom": "^28.0.0",
     "prettier": "^3.8.1",
     "typescript": "~5.9.2",

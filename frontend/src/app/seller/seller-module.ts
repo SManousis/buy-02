@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, Pipe, PipeTransform } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -11,13 +11,15 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialogModule } from '@angular/material/dialog';
-import { Pipe, PipeTransform } from '@angular/core';
 import { SellerRoutingModule } from './seller-routing-module';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { ProductForm } from './pages/product-form/product-form';
 import { ProductMedia } from './pages/product-media/product-media';
+import { SellerOrders } from './pages/orders/orders';
+import { SellerOrderDetail } from './pages/order-detail/order-detail';
 import { ConfirmDialogComponent } from '../shared/components/confirm-dialog/confirm-dialog';
 import { Product } from '../shared/services/product';
+import { SharedModule } from '../shared/shared-module';
 
 @Pipe({ name: 'activeCount', standalone: false })
 export class ActiveCountPipe implements PipeTransform {
@@ -27,12 +29,13 @@ export class ActiveCountPipe implements PipeTransform {
 }
 
 @NgModule({
-  declarations: [Dashboard, ProductForm, ProductMedia, ActiveCountPipe, ConfirmDialogComponent],
+  declarations: [Dashboard, ProductForm, ProductMedia, SellerOrders, SellerOrderDetail, ActiveCountPipe, ConfirmDialogComponent],
   imports: [
     CommonModule,
     ReactiveFormsModule,
     RouterModule,
     SellerRoutingModule,
+    SharedModule,
     MatButtonModule,
     MatIconModule,
     MatFormFieldModule,

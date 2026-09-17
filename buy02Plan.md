@@ -27,22 +27,21 @@ This is the shared source of truth for current progress. Update the relevant che
 
 ### Phase 2 - Persistent cart
 
-**Status:** Implementation and manual acceptance complete; awaiting the Angular cart PR checks, approval, and merge.
+**Status:** Complete and merged into `main` (PR #4 for the API, PR #5 for the Angular cart).
 
 - [x] Implement the persistent cart model, unique user index, product/stock validation, snapshots, endpoints, error handling, and tests on `feature-cart-api`.
 - [x] Verify the order-service suite: 7 tests passing.
 - [x] Commit and push `feature-cart-api` to GitHub and Gitea.
 - [x] Open the cart PR, pass Jenkins and SonarQube, obtain approval, and merge.
-- [x] Implement the Angular cart page, cart service, controls, subtotal, and header badge on `feature-angular-cart`; production build passes.
-- [ ] Push `feature-angular-cart`, pass Jenkins and SonarQube, obtain approval, and merge.
+- [x] Implement the Angular cart page, cart service, controls, subtotal, and header badge. Note that this was built twice in parallel: on `feature-angular-cart` (merged to `main` as PR #5) and again on `feature-phase3-orders-checkout` alongside the checkout flow. The Phase 3 version supersedes it, because only that one carries the quantity selector, the `/cart/checkout` route, and the 409-aware stock error handling that checkout depends on. Main's "Clear cart" control and catalog-grid add-to-cart button were carried across during the merge.
 - [x] Verify manually that cart contents and quantities survive browser refresh; badge and quantity changes render immediately.
 
 ### Phase 3 - Checkout and orders
 
-- [ ] Add the order schema, status history, per-seller checkout, and cash on delivery.
-- [ ] Add atomic stock decrement and restore integration.
-- [ ] Add buyer/seller listing, search, status transitions, cancellation, and reorder.
-- [ ] Add backend tests and buyer/seller Angular pages.
+- [x] Add the order schema, status history, per-seller checkout, and cash on delivery — prepared on the open `feature-phase3-orders-checkout` branch; not yet merged.
+- [x] Add atomic stock decrement and restore integration — prepared on the open `feature-phase3-orders-checkout` branch; not yet merged.
+- [x] Add buyer/seller listing, search, status transitions, cancellation, and reorder — prepared on the open `feature-phase3-orders-checkout` branch; not yet merged.
+- [x] Add backend tests and buyer/seller Angular pages — prepared on the open `feature-phase3-orders-checkout` branch (order-service 37/37, product-service 48/48, Angular 116/116 passing after the `main` merge); not yet merged. See `PHASE3_WORKFLOW.md` for the step-by-step record and design notes.
 
 ### Phase 4 - Search and filtering
 

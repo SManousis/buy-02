@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '../../shared/services/auth';
@@ -16,17 +16,11 @@ export class Header implements OnInit, OnDestroy {
   isSeller = false;
   username = '';
   avatarUrl: string | null = null;
-  cartCount = 0;
+  cartItemCount = 0;
 
   private destroy$ = new Subject<void>();
 
-  constructor(
-    private auth: AuthService,
-    private media: MediaService,
-    private router: Router,
-    private carts: CartService,
-    private changeDetector: ChangeDetectorRef,
-  ) {}
+  constructor(private auth: AuthService, private media: MediaService, private router: Router, private cart: CartService) {}
 
   ngOnInit(): void {
     this.auth.currentUser$
@@ -35,18 +29,16 @@ export class Header implements OnInit, OnDestroy {
         this.isLoggedIn = !!user;
         this.isSeller = user?.role === 'SELLER';
         this.username = user?.username ?? '';
-        if (user) this.carts.get().subscribe({ error: () => this.carts.resetCount() });
-        else this.carts.resetCount();
+        if (user) this.cart.refresh(); else this.cart.reset();
       });
-    this.carts.itemCount$.pipe(takeUntil(this.destroy$)).subscribe(count => {
-      this.cartCount = count;
-      this.changeDetector.detectChanges();
-    });
     this.auth.currentProfile$
       .pipe(takeUntil(this.destroy$))
       .subscribe(profile => {
         this.avatarUrl = profile?.avatarMediaId ? this.media.getImageUrl(profile.avatarMediaId) : null;
       });
+    this.cart.itemCount$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(count => this.cartItemCount = count);
   }
 
   ngOnDestroy(): void {
@@ -56,7 +48,7 @@ export class Header implements OnInit, OnDestroy {
 
   logout(): void {
     this.auth.logout();
-    this.carts.resetCount();
+    this.cart.reset();
     this.router.navigate(['/']);
   }
 }

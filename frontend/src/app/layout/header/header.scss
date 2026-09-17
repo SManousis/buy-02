@@ -72,8 +72,18 @@
 .seller-btn { gap: 4px; }
 
 .avatar-btn { color: var(--color-primary); }
-.cart-link { color: var(--color-primary); }
 .header-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+
+.cart-link {
+  display: flex;
+  align-items: center;
+  color: var(--color-text);
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+
+  &:hover { color: var(--color-primary); text-decoration: none; }
+}
 
 .menu-header {
   padding: 8px 16px;

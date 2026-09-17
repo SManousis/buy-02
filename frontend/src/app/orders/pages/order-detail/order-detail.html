@@ -1,0 +1,37 @@
+<div class="container page-wrapper order-detail-page">
+  <a routerLink="/orders" class="back-link">
+    <mat-icon>arrow_back</mat-icon> Back to orders
+  </a>
+
+  <div *ngIf="loading" class="state-center" aria-live="polite">
+    <mat-spinner diameter="48"></mat-spinner>
+  </div>
+
+  <div *ngIf="!loading && notFound" class="empty-dash">
+    <mat-icon>search_off</mat-icon>
+    <h2>Order not found</h2>
+    <p>This order does not exist or you don't have access to it.</p>
+    <a routerLink="/orders" class="btn-primary">Back to orders</a>
+  </div>
+
+  <ng-container *ngIf="!loading && !notFound && order as o">
+    <div class="detail-header">
+      <div>
+        <h1 class="dash-title">Order #{{ o.id.slice(-8) }}</h1>
+        <p class="dash-sub">Placed {{ o.createdAt | date:'medium' }}</p>
+      </div>
+      <span class="status-badge" [ngClass]="statusClass(o.status)">{{ o.status }}</span>
+    </div>
+
+    <app-order-detail-body [order]="o">
+      <div class="detail-actions">
+        <button type="button" class="btn-primary" [disabled]="reordering" (click)="reorder()">
+          {{ reordering ? 'Reordering…' : 'Reorder' }}
+        </button>
+        <button type="button" class="btn-outline cancel-btn" *ngIf="canCancel" [disabled]="cancelling" (click)="cancel()">
+          {{ cancelling ? 'Cancelling…' : 'Cancel order' }}
+        </button>
+      </div>
+    </app-order-detail-body>
+  </ng-container>
+</div>

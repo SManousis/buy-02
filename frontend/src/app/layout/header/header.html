@@ -20,12 +20,12 @@
       </ng-container>
 
       <ng-container *ngIf="isLoggedIn">
-        <a routerLink="/cart" mat-icon-button class="cart-link" aria-label="Open shopping cart"
-          [matBadge]="cartCount" [matBadgeHidden]="cartCount === 0" matBadgeColor="accent">
-          <mat-icon>shopping_cart</mat-icon>
-        </a>
         <a *ngIf="isSeller" routerLink="/seller" class="btn-outline btn-sm seller-btn">
           <mat-icon>dashboard</mat-icon> Dashboard
+        </a>
+        <a routerLink="/cart" class="cart-link" aria-label="View cart" matBadgeSize="small"
+          [matBadge]="cartItemCount > 0 ? cartItemCount : null" matBadgeColor="accent" matBadgeOverlap="true">
+          <mat-icon>shopping_cart</mat-icon>
         </a>
         <button mat-icon-button [matMenuTriggerFor]="userMenu" class="avatar-btn">
           <img *ngIf="avatarUrl; else defaultAvatar" class="header-avatar" [src]="avatarUrl" alt="Your avatar">
@@ -36,6 +36,9 @@
           <mat-divider></mat-divider>
           <a mat-menu-item routerLink="/profile">
             <mat-icon>person</mat-icon> Profile
+          </a>
+          <a mat-menu-item routerLink="/orders">
+            <mat-icon>receipt_long</mat-icon> My Orders
           </a>
           <button mat-menu-item (click)="logout()">
             <mat-icon>logout</mat-icon> Sign out

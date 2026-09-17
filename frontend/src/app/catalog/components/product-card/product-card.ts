@@ -1,10 +1,12 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 import { Product } from '../../../shared/services/product';
 import { CartService } from '../../../shared/services/cart';
 import { AuthService } from '../../../shared/services/auth';
 import { environment } from '../../../../environments/environment';
+import { addToCartErrorMessage } from '../../../shared/services/http-error';
 
 @Component({
   selector: 'app-product-card',
@@ -12,21 +14,52 @@ import { environment } from '../../../../environments/environment';
   templateUrl: './product-card.html',
   styleUrl: './product-card.scss',
 })
-export class ProductCard {
+export class ProductCard implements OnDestroy {
   @Input() product!: Product;
-  adding = false;
+  addingToCart = false;
 
-  constructor(private carts: CartService, private auth: AuthService, private router: Router, private snackBar: MatSnackBar) {}
+  private destroy$ = new Subject<void>();
+
+  constructor(
+    private cartService: CartService,
+    private auth: AuthService,
+    private router: Router,
+    private snack: MatSnackBar,
+    private changeDetector: ChangeDetectorRef,
+  ) {}
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /** Mirrors the product detail page: buyers only, and only while stock remains. */
+  get canAddToCart(): boolean {
+    return this.auth.isLoggedIn() && !this.auth.hasRole('SELLER') && (this.product?.stock ?? 1) > 0;
+  }
 
   addToCart(event: Event): void {
     event.stopPropagation();
-    if (!this.auth.isLoggedIn()) { this.router.navigate(['/auth/login'], { queryParams: { returnUrl: `/products/${this.product.id}` } }); return; }
-    if (this.product.stock === 0 || this.adding) return;
-    this.adding = true;
-    this.carts.add(this.product.id).subscribe({
-      next: () => { this.adding = false; this.snackBar.open(`${this.product.name} added to cart`, 'View cart', { duration: 3500 }).onAction().subscribe(() => this.router.navigate(['/cart'])); },
-      error: error => { this.adding = false; this.snackBar.open(error?.error?.message ?? 'Could not add this product.', 'Close', { duration: 4500 }); },
-    });
+    if (!this.canAddToCart || this.addingToCart) return;
+    this.addingToCart = true;
+    this.cartService.addItem(this.product.id, 1)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.addingToCart = false;
+          this.changeDetector.detectChanges();
+          this.snack
+            .open(`${this.product.name} added to cart`, 'View cart', { duration: 3500, panelClass: 'snack-success' })
+            .onAction()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(() => this.router.navigate(['/cart']));
+        },
+        error: (error) => {
+          this.addingToCart = false;
+          this.changeDetector.detectChanges();
+          this.snack.open(addToCartErrorMessage(error), 'Close', { duration: 4000, panelClass: 'snack-error' });
+        },
+      });
   }
 
   get imageUrl(): string {

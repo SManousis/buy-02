@@ -6,6 +6,7 @@
 **/dist/
 **/.angular/
 **/coverage/
+**/.scannerwork/
 
 # IDE/editor files
 .idea/

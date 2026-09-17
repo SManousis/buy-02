@@ -1,0 +1,9 @@
+// The shared order sections live in app-order-detail-body, and the page chrome
+// (back link, loading and empty states, detail header, action stack) is defined
+// globally in src/styles.scss. Only the buyer-specific cancel button is left.
+.cancel-btn {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+
+  &:hover { background: var(--color-danger); color: #fff; }
+}

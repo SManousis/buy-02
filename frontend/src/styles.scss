@@ -166,3 +166,76 @@ mat-form-field {
 @media (max-width: 600px) {
   .product-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
 }
+
+/* Order status badges. Shared by the buyer and seller order views and by the
+   order-detail-body component, so they live here rather than in any one
+   component's scoped styles. */
+.status-badge {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  height: fit-content;
+}
+
+.status-pending   { background: #fdf2e0; color: #a9701c; }
+.status-confirmed { background: #e3f0fc; color: #1b6ca8; }
+.status-shipped   { background: #eae5fb; color: #5b3ea6; }
+.status-delivered { background: #e6f4ea; color: #2d6a4f; }
+.status-cancelled { background: #fbe7e4; color: #c0392b; }
+
+/* Page chrome shared by the order, cart and seller views: the back link, the
+   loading and empty states, and the detail page header. Defined once here so
+   individual page stylesheets do not repeat them. */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 24px;
+  font-size: 14px;
+  color: var(--color-muted);
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  &:hover { color: var(--color-primary); text-decoration: none; }
+}
+
+.state-center {
+  display: flex;
+  justify-content: center;
+  padding: 80px 0;
+}
+
+.empty-dash {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 80px 0;
+  text-align: center;
+  color: var(--color-muted);
+
+  mat-icon { font-size: 56px; width: 56px; height: 56px; }
+  h2 { font-size: 22px; font-weight: 700; margin: 0; color: var(--color-text); }
+  p  { margin: 0 0 8px; }
+}
+
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 20px 0 24px;
+}
+
+.dash-title { font-size: 26px; font-weight: 800; margin: 0 0 4px; }
+.dash-sub   { color: var(--color-muted); font-size: 14px; margin: 0; }
+
+.detail-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

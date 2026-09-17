@@ -5,6 +5,7 @@ import { BehaviorSubject } from 'rxjs';
 import { AppModule } from '../../app-module';
 import { AuthService } from '../../shared/services/auth';
 import { MediaService } from '../../shared/services/media';
+import { CartService } from '../../shared/services/cart';
 import { Header } from './header';
 
 describe('Header', () => {
@@ -12,18 +13,32 @@ describe('Header', () => {
   let fixture: ComponentFixture<Header>;
   let currentUser: BehaviorSubject<{ username: string; role: 'CLIENT' | 'SELLER' } | null>;
   let currentProfile: BehaviorSubject<{ avatarMediaId: string | null } | null>;
+  let cartItemCount: BehaviorSubject<number>;
   let logoutCalls: number;
+  let refreshCalls: number;
+  let resetCalls: number;
 
   beforeEach(async () => {
     currentUser = new BehaviorSubject<{ username: string; role: 'CLIENT' | 'SELLER' } | null>(null);
     currentProfile = new BehaviorSubject<{ avatarMediaId: string | null } | null>(null);
+    cartItemCount = new BehaviorSubject<number>(0);
     logoutCalls = 0;
+    refreshCalls = 0;
+    resetCalls = 0;
     await TestBed.configureTestingModule({
       imports: [AppModule],
       providers: [
         provideRouter([]),
         { provide: AuthService, useValue: { currentUser$: currentUser, currentProfile$: currentProfile, logout: () => logoutCalls++ } },
         { provide: MediaService, useValue: { getImageUrl: (id: string) => `/media/images/${id}` } },
+        {
+          provide: CartService,
+          useValue: {
+            itemCount$: cartItemCount,
+            refresh: () => refreshCalls++,
+            reset: () => resetCalls++,
+          },
+        },
       ],
     }).compileComponents();
 
@@ -64,5 +79,28 @@ describe('Header', () => {
     component.logout();
 
     expect(logoutCalls).toBe(1);
+  });
+
+  it('refreshes the cart badge on login and resets it on logout', () => {
+    fixture.detectChanges();
+    expect(refreshCalls).toBe(0);
+    const resetsAtInit = resetCalls;
+
+    currentUser.next({ username: 'Ariadne', role: 'CLIENT' });
+    fixture.detectChanges(false);
+    expect(refreshCalls).toBe(1);
+
+    currentUser.next(null);
+    fixture.detectChanges(false);
+    expect(resetCalls).toBe(resetsAtInit + 1);
+  });
+
+  it('shows the cart item count from the cart badge stream', () => {
+    fixture.detectChanges();
+
+    cartItemCount.next(3);
+    fixture.detectChanges(false);
+
+    expect(component.cartItemCount).toBe(3);
   });
 });

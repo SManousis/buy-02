@@ -10,6 +10,8 @@ cd "$(dirname "$0")/../frontend"
 
 npm ci
 npm run build
+# Sonar's coverage condition needs an LCOV report; see sonar.javascript.lcov.reportPaths.
+npm run test:coverage
 npx sonar-scanner \
   -Dproject.settings=sonar-project.properties \
   -Dsonar.host.url="${SONAR_HOST_URL}" \

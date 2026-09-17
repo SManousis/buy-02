@@ -48,6 +48,16 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, ex.getMessage(), null);
     }
 
+    @ExceptionHandler(StockConflictException.class)
+    public ResponseEntity<Map<String, Object>> handleStockConflict(StockConflictException ex) {
+        return build(HttpStatus.CONFLICT, ex.getMessage(), null);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
+        return build(HttpStatus.BAD_REQUEST, ex.getMessage(), null);
+    }
+
     @ExceptionHandler(MediaServiceUnavailableException.class)
     public ResponseEntity<Map<String, Object>> handleMediaUnavailable(MediaServiceUnavailableException ex) {
         log.warn("Media validation unavailable: {}", ex.getMessage());

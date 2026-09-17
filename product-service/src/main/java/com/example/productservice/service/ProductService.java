@@ -6,11 +6,18 @@ import com.example.productservice.dto.UpdateProductRequest;
 import com.example.productservice.client.MediaOwnershipClient;
 import com.example.productservice.exception.InvalidMediaReferenceException;
 import com.example.productservice.exception.NotFoundException;
+import com.example.productservice.exception.StockConflictException;
 import com.example.productservice.kafka.ProductEventProducer;
 import com.example.productservice.model.Product;
 import com.example.productservice.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,13 +26,26 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ProductService {
 
     private final ProductRepository productRepository;
     private final ProductEventProducer eventProducer;
     private final MediaOwnershipClient mediaOwnershipClient;
+    private MongoTemplate mongoTemplate;
+
+    public ProductService(ProductRepository productRepository,
+                          ProductEventProducer eventProducer,
+                          MediaOwnershipClient mediaOwnershipClient) {
+        this.productRepository = productRepository;
+        this.eventProducer = eventProducer;
+        this.mediaOwnershipClient = mediaOwnershipClient;
+    }
+
+    @Autowired(required = false)
+    public void setMongoTemplate(MongoTemplate mongoTemplate) {
+        this.mongoTemplate = mongoTemplate;
+    }
 
     @Transactional
     public ProductResponse createProduct(String sellerId, String bearerToken, CreateProductRequest request) {
@@ -60,6 +80,31 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("Product not found"));
         return ProductResponse.from(product);
+    }
+
+    @Transactional
+    public ProductResponse adjustStock(String productId, int delta) {
+        if (delta == 0) {
+            throw new IllegalArgumentException("Stock delta must not be zero");
+        }
+
+        Query query = Query.query(Criteria.where("_id").is(productId));
+        if (delta < 0) {
+            query.addCriteria(Criteria.where("stock").gte(-delta));
+        }
+        Product updated = mongoTemplate.findAndModify(
+                query,
+                new Update().inc("stock", delta),
+                FindAndModifyOptions.options().returnNew(true),
+                Product.class);
+        if (updated == null) {
+            if (!productRepository.existsById(productId)) {
+                throw new NotFoundException("Product not found");
+            }
+            throw new StockConflictException("Insufficient stock for product");
+        }
+        eventProducer.publishProductUpdated(updated);
+        return ProductResponse.from(updated);
     }
 
     @Transactional

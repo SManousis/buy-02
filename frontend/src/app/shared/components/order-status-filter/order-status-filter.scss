@@ -1,0 +1,17 @@
+:host { display: contents; }
+
+.filter-label {
+  font-size: 13px;
+  color: var(--color-muted);
+  font-weight: 500;
+}
+
+.filter-select {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 14px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+}

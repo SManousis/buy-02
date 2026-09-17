@@ -1,0 +1,10 @@
+<div *ngIf="loading" class="state-center" aria-live="polite">
+  <mat-spinner diameter="48"></mat-spinner>
+</div>
+
+<div *ngIf="!loading && error" class="empty-dash">
+  <mat-icon>error_outline</mat-icon>
+  <h2>{{ errorTitle }}</h2>
+  <p>Check your connection and try again.</p>
+  <button type="button" class="btn-primary" (click)="retry.emit()">Try again</button>
+</div>

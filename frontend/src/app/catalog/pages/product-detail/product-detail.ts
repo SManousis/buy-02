@@ -1,11 +1,12 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Subject, takeUntil } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Product, ProductService } from '../../../shared/services/product';
-import { CartService } from '../../../shared/services/cart';
 import { AuthService } from '../../../shared/services/auth';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
+import { CartService } from '../../../shared/services/cart';
+import { addToCartErrorMessage } from '../../../shared/services/http-error';
 
 @Component({
   selector: 'app-product-detail',
@@ -13,21 +14,23 @@ import { Router } from '@angular/router';
   templateUrl: './product-detail.html',
   styleUrl: './product-detail.scss',
 })
-export class ProductDetail implements OnInit {
+export class ProductDetail implements OnInit, OnDestroy {
   product: Product | null = null;
   loading = true;
   notFound = false;
   selectedImageIndex = 0;
-  adding = false;
+  quantity = 1;
+  addingToCart = false;
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private route: ActivatedRoute,
     private productService: ProductService,
     private changeDetector: ChangeDetectorRef,
-    private carts: CartService,
+    private cartService: CartService,
     private auth: AuthService,
-    private router: Router,
-    private snackBar: MatSnackBar,
+    private snack: MatSnackBar,
   ) {}
 
   ngOnInit(): void {
@@ -38,28 +41,57 @@ export class ProductDetail implements OnInit {
       return;
     }
 
-    this.productService.getById(productId).subscribe({
-      next: (product) => {
-        this.product = product;
-        this.loading = false;
-        this.changeDetector.detectChanges();
-      },
-      error: () => {
-        this.notFound = true;
-        this.loading = false;
-        this.changeDetector.detectChanges();
-      },
-    });
+    this.productService.getById(productId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (product) => {
+          this.product = product;
+          this.loading = false;
+          this.changeDetector.detectChanges();
+        },
+        error: () => {
+          this.notFound = true;
+          this.loading = false;
+          this.changeDetector.detectChanges();
+        },
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  get canAddToCart(): boolean {
+    return this.auth.isLoggedIn() && !this.auth.hasRole('SELLER') && (this.product?.stock ?? 1) > 0;
+  }
+
+  incrementQuantity(): void {
+    const max = this.product?.stock ?? Number.MAX_SAFE_INTEGER;
+    if (this.quantity < max) this.quantity++;
+  }
+
+  decrementQuantity(): void {
+    if (this.quantity > 1) this.quantity--;
   }
 
   addToCart(): void {
-    if (!this.product) return;
-    if (!this.auth.isLoggedIn()) { this.router.navigate(['/auth/login'], { queryParams: { returnUrl: this.router.url } }); return; }
-    this.adding = true;
-    this.carts.add(this.product.id).subscribe({
-      next: () => { this.adding = false; this.snackBar.open('Added to cart', 'View cart', { duration: 3500 }).onAction().subscribe(() => this.router.navigate(['/cart'])); this.changeDetector.detectChanges(); },
-      error: error => { this.adding = false; this.snackBar.open(error?.error?.message ?? 'Could not add this product.', 'Close', { duration: 4500 }); this.changeDetector.detectChanges(); },
-    });
+    if (!this.product || this.addingToCart) return;
+    this.addingToCart = true;
+    this.cartService.addItem(this.product.id, this.quantity)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.addingToCart = false;
+          this.changeDetector.detectChanges();
+          this.snack.open('Added to cart!', 'Close', { duration: 2500, panelClass: 'snack-success' });
+        },
+        error: (error) => {
+          this.addingToCart = false;
+          this.changeDetector.detectChanges();
+          this.snack.open(addToCartErrorMessage(error), 'Close', { duration: 4000, panelClass: 'snack-error' });
+        },
+      });
   }
 
   selectImage(index: number): void {
@@ -88,3 +120,4 @@ export class ProductDetail implements OnInit {
     return `${this.product.stock} in stock`;
   }
 }
+
