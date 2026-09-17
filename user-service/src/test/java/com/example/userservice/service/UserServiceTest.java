@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -72,6 +73,22 @@ class UserServiceTest {
                 .email("bob@example.com")
                 .role(UserRole.CLIENT)
                 .build();
+    }
+
+    @Test
+    void listsSellerSummariesInRepositoryOrder() {
+        User alice = seller();
+        User zoe = User.builder().id("seller-2").username("zoe")
+                .email("private@example.com").role(UserRole.SELLER).build();
+        when(userRepository.findByRoleOrderByUsernameAsc(UserRole.SELLER))
+                .thenReturn(List.of(alice, zoe));
+
+        var sellers = userService.listSellers();
+
+        assertThat(sellers).extracting("id", "username")
+                .containsExactly(
+                        org.assertj.core.groups.Tuple.tuple("seller-1", "alice"),
+                        org.assertj.core.groups.Tuple.tuple("seller-2", "zoe"));
     }
 
     @Test

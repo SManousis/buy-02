@@ -70,6 +70,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login").permitAll()
                 .requestMatchers(HttpMethod.GET,  "/actuator/health", "/actuator/info").permitAll()
+                .requestMatchers(HttpMethod.GET, "/sellers").permitAll()
                 .anyRequest().authenticated()
             )
 

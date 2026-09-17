@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -81,6 +82,27 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.status").value(503))
                 .andExpect(jsonPath("$.message").value("Media validation is temporarily unavailable"))
                 .andExpect(jsonPath("$.trace").doesNotExist());
+    }
+
+    @Test
+    void forwardsPublicSearchFilters() throws Exception {
+        when(productService.searchProducts(any(), any(), any(), any(), any(), any(),
+                org.mockito.ArgumentMatchers.anyInt(), org.mockito.ArgumentMatchers.anyInt()))
+                .thenReturn(List.of());
+
+        mockMvc.perform(get("/products")
+                        .param("q", "olive")
+                        .param("minPrice", "5")
+                        .param("maxPrice", "20")
+                        .param("sellerId", "seller-1")
+                        .param("inStock", "true")
+                        .param("sort", "price_desc")
+                        .param("page", "1")
+                        .param("size", "12"))
+                .andExpect(status().isOk());
+
+        verify(productService).searchProducts("olive", new BigDecimal("5"), new BigDecimal("20"),
+                "seller-1", true, "price_desc", 1, 12);
     }
 
     @Test

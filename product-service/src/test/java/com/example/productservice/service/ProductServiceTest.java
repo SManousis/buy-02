@@ -74,6 +74,10 @@ class ProductServiceTest {
     @Test
     void rejectsInvalidSearchFilters() {
         assertThatThrownBy(() -> productService.searchProducts(
+                null, new BigDecimal("-1"), null, null, null, "newest", 0, 24))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("negative");
+        assertThatThrownBy(() -> productService.searchProducts(
                 null, new BigDecimal("20"), new BigDecimal("10"), null, null, "newest", 0, 24))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Minimum price");
@@ -81,6 +85,23 @@ class ProductServiceTest {
                 null, null, null, null, null, "unknown", 0, 24))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Unsupported");
+        assertThatThrownBy(() -> productService.searchProducts(
+                null, null, null, null, null, "newest", -1, 0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("pagination");
+    }
+
+    @Test
+    void acceptsEachSupportedSortWithoutOptionalFilters() {
+        when(mongoTemplate.find(org.mockito.ArgumentMatchers.any(org.springframework.data.mongodb.core.query.Query.class),
+                org.mockito.ArgumentMatchers.eq(Product.class))).thenReturn(List.of());
+
+        productService.searchProducts(null, null, null, null, false, "price_desc", 1, 10);
+        productService.searchProducts("  ", null, null, "  ", null, "newest", 0, 24);
+
+        verify(mongoTemplate, org.mockito.Mockito.times(2)).find(
+                org.mockito.ArgumentMatchers.any(org.springframework.data.mongodb.core.query.Query.class),
+                org.mockito.ArgumentMatchers.eq(Product.class));
     }
 
     @Test

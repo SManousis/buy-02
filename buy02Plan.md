@@ -62,10 +62,19 @@ Design note: §3.4 suggested a Mongo aggregation pipeline. The statistics are in
 
 ### Phase 6 - Completion and audit
 
-- [ ] Complete responsive-design, validation, security, and negative-path testing.
+- [x] Verify the new cart, orders, search/filter, and profile interfaces on mobile and desktop layouts.
+- [x] Replace the catalog's free-text internal seller-ID filter with a public, user-friendly seller-name dropdown; only `{id, username}` is exposed.
+- [x] Complete validation, security, and negative-path testing.
+  - [x] Automated verification passed for `user-service` and `api-gateway`; Angular unit tests and the production build also passed.
+  - [x] Expired JWT: Angular removed `agora_token`/`agora_user` and returned the user to an unauthenticated state.
+  - [x] Expired JWT: Gateway/backend rejected a genuinely expired signed token with HTTP `401 Unauthorized`.
+  - [x] Buyer and seller statistics matched their non-cancelled order histories; cancelled orders were excluded and each seller saw only their own revenue/products.
+  - [x] Statistics access controls returned `403` for a buyer requesting seller statistics and `401` without authentication; new accounts showed the correct empty states.
 - [ ] Record SonarQube findings and fixes.
+  - [x] Initial Phase 6 scan found only new-code coverage failures: order-service 75.0% and product-service 55.1%; reliability, security, maintainability, and duplication conditions passed.
+  - [x] Added focused checkout, rollback, empty-cart, product-filter validation/sorting, and controller-forwarding tests; both affected service suites pass locally.
 - [ ] Update README architecture, routes, database design, Kafka topics, and runtime instructions.
-- [ ] Run and document the Section 10 acceptance scenario.
+- [x] Run the Section 10 acceptance scenarios manually against the rebuilt Compose stack; cart persistence, checkout, order management, search/filtering, profile statistics, responsive layouts, and security/negative paths passed.
 - [ ] Confirm every feature PR has green CI and teammate approval.
 - [ ] Implement wishlist and extra payment methods only after required work is complete (bonus).
 
