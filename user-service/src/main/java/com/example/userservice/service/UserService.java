@@ -11,6 +11,8 @@ import com.example.userservice.dto.LoginRequest;
 import com.example.userservice.dto.RegisterRequest;
 import com.example.userservice.dto.UpdateProfileRequest;
 import com.example.userservice.dto.UserProfileResponse;
+import com.example.userservice.dto.SellerSummaryResponse;
+import java.util.List;
 import com.example.userservice.client.MediaOwnershipClient;
 import com.example.userservice.exception.ConflictException;
 import com.example.userservice.exception.InvalidAvatarMediaException;
@@ -89,6 +91,12 @@ public class UserService {
 
     public UserProfileResponse getProfile(String userId) {
         return UserProfileResponse.from(findById(userId));
+    }
+
+    public List<SellerSummaryResponse> listSellers() {
+        return userRepository.findByRoleOrderByUsernameAsc(UserRole.SELLER).stream()
+                .map(SellerSummaryResponse::from)
+                .toList();
     }
 
     @Transactional

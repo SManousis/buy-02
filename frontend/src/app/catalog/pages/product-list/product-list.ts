@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject, takeUntil, timeout } from 'rxjs';
-import { Product, ProductFilters, ProductService } from '../../../shared/services/product';
+import { Product, ProductFilters, ProductService, SellerSummary } from '../../../shared/services/product';
 
 @Component({
   selector: 'app-product-list',
@@ -13,6 +13,7 @@ export class ProductList implements OnInit, OnDestroy {
   loading = true;
   error = false;
   filters: ProductFilters = { sort: 'newest', inStock: false, page: 0, size: 24 };
+  sellers: SellerSummary[] = [];
   private filterTimer?: ReturnType<typeof setTimeout>;
 
   private destroy$ = new Subject<void>();
@@ -23,6 +24,13 @@ export class ProductList implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.productService.getSellers().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (sellers) => {
+        this.sellers = sellers;
+        this.changeDetector.detectChanges();
+      },
+      error: () => { this.sellers = []; },
+    });
     this.loadProducts();
   }
 

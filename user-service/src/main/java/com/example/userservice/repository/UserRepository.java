@@ -5,6 +5,8 @@ import jdk.jfr.Description;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;
+import java.util.List;
+import com.example.userservice.model.UserRole;
 
 public interface UserRepository extends MongoRepository<User, String> {
 
@@ -15,4 +17,6 @@ public interface UserRepository extends MongoRepository<User, String> {
     boolean existsByEmail(String email);
 
     boolean existsByUsername(String username);
+
+    List<User> findByRoleOrderByUsernameAsc(UserRole role);
 }

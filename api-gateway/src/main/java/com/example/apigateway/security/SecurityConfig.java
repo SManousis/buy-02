@@ -54,6 +54,7 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .pathMatchers(HttpMethod.POST, "/auth/register", "/auth/login").permitAll()
                         .pathMatchers(HttpMethod.GET, "/actuator/health", "/actuator/info").permitAll()
+                        .pathMatchers(HttpMethod.GET, "/sellers").permitAll()
                         .pathMatchers(HttpMethod.GET, "/products/my").hasRole(SELLER_ROLE)
                         .pathMatchers(HttpMethod.GET, "/products", PRODUCT_BY_ID_PATH).permitAll()
                         .pathMatchers(HttpMethod.POST, "/products").hasRole(SELLER_ROLE)

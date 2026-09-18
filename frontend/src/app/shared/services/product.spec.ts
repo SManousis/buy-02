@@ -34,6 +34,14 @@ describe('ProductService', () => {
     request.flush([]);
   });
 
+  it('loads public seller names for the catalog filter', () => {
+    service.getSellers().subscribe();
+
+    const request = http.expectOne('http://localhost:8080/sellers');
+    expect(request.request.method).toBe('GET');
+    request.flush([]);
+  });
+
   it('normalizes legacy imageUrls responses without dropping associations', () => {
     let product: Product | undefined;
     service.getById('product-1').subscribe((response) => product = response);
